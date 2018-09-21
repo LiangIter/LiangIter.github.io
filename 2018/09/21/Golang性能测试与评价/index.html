@@ -5,7 +5,7 @@
   
 
 
-<html class="theme-next muse use-motion" lang="zh-Hans">
+<html class="theme-next gemini use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="##Golang性能测试与思考 本文测试Go、Python、PyPy、C的效率，作为学习Go的参考标准。测试用例：进行(2&amp;lt;&amp;lt;25)次简单加法  测试环境：系统：Windows7 专业版CPU：Intel(R) Core(TM) i5-4590 CPU @ 3.30GHZ 3.30GHZ, 14级流水线（Pipeline）   参考资料：Core微架构14级流水线 测试用例：进行(2&amp;">
+<meta name="description" content="本文测试Go、Python、PyPy、C的效率，作为学习Go的参考标准。测试用例：进行(2&amp;lt;&amp;lt;25)次简单加法  测试环境：系统：Windows7 专业版CPU：Intel(R) Core(TM) i5-4590 CPU @ 3.30GHZ 3.30GHZ, 14级流水线（Pipeline）   参考资料：Core微架构14级流水线 测试用例：进行(2&amp;lt;&amp;lt;25)次简单加法">
 <meta property="og:type" content="article">
-<meta property="og:title" content="LiangIter">
+<meta property="og:title" content="Golang性能测试与思考">
 <meta property="og:url" content="http://yoursite.com/2018/09/21/Golang性能测试与评价/index.html">
 <meta property="og:site_name" content="LiangIter">
-<meta property="og:description" content="##Golang性能测试与思考 本文测试Go、Python、PyPy、C的效率，作为学习Go的参考标准。测试用例：进行(2&amp;lt;&amp;lt;25)次简单加法  测试环境：系统：Windows7 专业版CPU：Intel(R) Core(TM) i5-4590 CPU @ 3.30GHZ 3.30GHZ, 14级流水线（Pipeline）   参考资料：Core微架构14级流水线 测试用例：进行(2&amp;">
+<meta property="og:description" content="本文测试Go、Python、PyPy、C的效率，作为学习Go的参考标准。测试用例：进行(2&amp;lt;&amp;lt;25)次简单加法  测试环境：系统：Windows7 专业版CPU：Intel(R) Core(TM) i5-4590 CPU @ 3.30GHZ 3.30GHZ, 14级流水线（Pipeline）   参考资料：Core微架构14级流水线 测试用例：进行(2&amp;lt;&amp;lt;25)次简单加法">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-09-21T02:18:46.134Z">
+<meta property="og:updated_time" content="2018-09-21T06:37:18.893Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="LiangIter">
-<meta name="twitter:description" content="##Golang性能测试与思考 本文测试Go、Python、PyPy、C的效率，作为学习Go的参考标准。测试用例：进行(2&amp;lt;&amp;lt;25)次简单加法  测试环境：系统：Windows7 专业版CPU：Intel(R) Core(TM) i5-4590 CPU @ 3.30GHZ 3.30GHZ, 14级流水线（Pipeline）   参考资料：Core微架构14级流水线 测试用例：进行(2&amp;">
+<meta name="twitter:title" content="Golang性能测试与思考">
+<meta name="twitter:description" content="本文测试Go、Python、PyPy、C的效率，作为学习Go的参考标准。测试用例：进行(2&amp;lt;&amp;lt;25)次简单加法  测试环境：系统：Windows7 专业版CPU：Intel(R) Core(TM) i5-4590 CPU @ 3.30GHZ 3.30GHZ, 14级流水线（Pipeline）   参考资料：Core微架构14级流水线 测试用例：进行(2&amp;lt;&amp;lt;25)次简单加法">
 
 
 
@@ -97,7 +97,7 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Muse',
+    scheme: 'Gemini',
     version: '5.1.4',
     sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: true,
@@ -125,7 +125,7 @@
 
 
 
-  <title> | LiangIter</title>
+  <title>Golang性能测试与思考 | LiangIter</title>
   
 
 
@@ -149,7 +149,7 @@
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-wrapper">
-  <div class="site-meta ">
+  <div class="site-meta custom-logo">
     
 
     <div class="custom-logo-site-title">
@@ -186,6 +186,16 @@
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
             首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
           </a>
         </li>
       
@@ -249,7 +259,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline"></h1>
+          <h1 class="post-title" itemprop="name headline">Golang性能测试与思考</h1>
         
 
         <div class="post-meta">
@@ -299,8 +309,7 @@
       
 
       
-        <p>##Golang性能测试与思考</p>
-<p>本文测试Go、Python、PyPy、C的效率，作为学习Go的参考标准。测试用例：进行(2&lt;&lt;25)次简单加法</p>
+        <p>本文测试Go、Python、PyPy、C的效率，作为学习Go的参考标准。测试用例：进行(2&lt;&lt;25)次简单加法</p>
 <blockquote>
 <p>测试环境：<br><br>系统：Windows7 专业版<br><br>CPU：Intel(R) Core(TM) i5-4590 CPU @ 3.30GHZ 3.30GHZ, 14级流水线（Pipeline）<br> </p>
 </blockquote>
@@ -365,22 +374,6 @@
       
 
       
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2018/09/21/hello-world/" rel="next" title="Hello World">
-                <i class="fa fa-chevron-left"></i> Hello World
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-          </div>
-        </div>
-      
 
       
       
@@ -444,7 +437,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-count">1</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -458,6 +451,22 @@
 
           
 
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/LiangIter/" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hl_hnu@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
           
 
           
@@ -495,15 +504,9 @@
 </div>
 
 
-  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
 
 
 
-  <span class="post-meta-divider">|</span>
-
-
-
-  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
 
 
 
@@ -602,6 +605,13 @@
 
   
   
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
 
   
   <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
