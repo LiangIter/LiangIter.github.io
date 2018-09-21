@@ -79,13 +79,17 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="LiangIter">
-<meta property="og:url" content="http://yoursite.com/archives/2018/09/index.html">
+<meta name="description" content="无论用什么语言来实现需求，最后基本都会需要对代码运行时间进行优化，降低cpu占用率  这里主要介绍两个profile工具：  cProfile：用cProfile生成程序运行时的profile文件，用python pyprof2calltree.py -i file生成文件供QCacheGrind读取；然后用qcachegrind.exe查看，可以看到图像化的代码情况，面积表示cpu占比，可以很">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PythonCPU诊断优化">
+<meta property="og:url" content="http://yoursite.com/2018/09/21/PythonCPU诊断优化/index.html">
 <meta property="og:site_name" content="LiangIter">
+<meta property="og:description" content="无论用什么语言来实现需求，最后基本都会需要对代码运行时间进行优化，降低cpu占用率  这里主要介绍两个profile工具：  cProfile：用cProfile生成程序运行时的profile文件，用python pyprof2calltree.py -i file生成文件供QCacheGrind读取；然后用qcachegrind.exe查看，可以看到图像化的代码情况，面积表示cpu占比，可以很">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-09-21T07:41:52.348Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="LiangIter">
+<meta name="twitter:title" content="PythonCPU诊断优化">
+<meta name="twitter:description" content="无论用什么语言来实现需求，最后基本都会需要对代码运行时间进行优化，降低cpu占用率  这里主要介绍两个profile工具：  cProfile：用cProfile生成程序运行时的profile文件，用python pyprof2calltree.py -i file生成文件供QCacheGrind读取；然后用qcachegrind.exe查看，可以看到图像化的代码情况，面积表示cpu占比，可以很">
 
 
 
@@ -115,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/archives/2018/09/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/09/21/PythonCPU诊断优化/"/>
 
 
 
 
 
-  <title>归档 | LiangIter</title>
+  <title>PythonCPU诊断优化 | LiangIter</title>
   
 
 
@@ -140,7 +144,7 @@
     
   
 
-  <div class="container sidebar-position-left page-archive">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -224,296 +228,153 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block archive">
-    <div id="posts" class="posts-collapse">
-      <span class="archive-move-on"></span>
+  <div id="posts" class="posts-expand">
+    
 
-      <span class="archive-page-counter">
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/21/PythonCPU诊断优化/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Liang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LiangIter">
+    </span>
+
+    
+      <header class="post-header">
+
         
         
+          <h1 class="post-title" itemprop="name headline">PythonCPU诊断优化</h1>
         
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-21T15:40:02+08:00">
+                2018-09-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
           
-        
-        嗯..! 目前共计 7 篇日志。 继续努力。
-      </span>
 
-      
-
-        
-        
-        
-
-        
           
-          <div class="collection-title">
-            <h1 class="archive-year" id="archive-year-2018">2018</h1>
-          </div>
-        
-        
+            
+          
 
-        
+          
+          
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+          
 
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/09/21/通用技术总结/" itemprop="url">
-              
-                <span itemprop="name">通用技术总结</span>
-              
-            </a>
-        
-      </h2>
+          
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-09-21T15:51:30+08:00"
-              content="2018-09-21" >
-          09-21
-        </time>
-      </div>
+          
 
-    </header>
-  </article>
+        </div>
+      </header>
+    
 
-
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/09/21/全球同服游戏服务器框架/" itemprop="url">
-              
-                <span itemprop="name">游戏全球同服服务器框架</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-09-21T15:40:02+08:00"
-              content="2018-09-21" >
-          09-21
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
       
 
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/09/21/Python内存泄露查询/" itemprop="url">
-              
-                <span itemprop="name">Python内存泄露查询</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-09-21T15:40:02+08:00"
-              content="2018-09-21" >
-          09-21
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
+      
+        <blockquote>
+<p>无论用什么语言来实现需求，最后基本都会需要对代码运行时间进行优化，降低cpu占用率</p>
+</blockquote>
+<p>这里主要介绍两个profile工具：</p>
+<ol>
+<li>cProfile：用cProfile生成程序运行时的profile文件，用<code>python pyprof2calltree.py -i file</code>生成文件供QCacheGrind读取；然后用qcachegrind.exe查看，可以看到图像化的代码情况，面积表示cpu占比，可以很方便的找到cpu占比高的代码来进行优化。</li>
+<li>vmprof：vmprof支持pypy，先用vmprof生成profile文件（<code>pypy -m vmprof -o log.jit example.py</code>），用<code>vmprofshow log.jit</code>来查看代码占用cpu情况；</li>
+</ol>
+<p>cprofile图形化结果更加强大，但是不支持pypy。</p>
 
       
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/09/21/PythonCPU诊断优化/" itemprop="url">
-              
-                <span itemprop="name">PythonCPU诊断优化</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-09-21T15:40:02+08:00"
-              content="2018-09-21" >
-          09-21
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/09/21/pomelo压测/" itemprop="url">
-              
-                <span itemprop="name">Pomelo压测.md</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-09-21T15:40:02+08:00"
-              content="2018-09-21" >
-          09-21
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/09/21/十亿级别字符串模糊匹配设计与实现/" itemprop="url">
-              
-                <span itemprop="name">十亿级别字符串模糊匹配设计与实现</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-09-21T15:40:02+08:00"
-              content="2018-09-21" >
-          09-21
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/09/21/Golang性能测试与评价/" itemprop="url">
-              
-                <span itemprop="name">Golang性能测试与思考</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-09-21T10:18:23+08:00"
-              content="2018-09-21" >
-          09-21
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
     </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/21/pomelo压测/" rel="next" title="Pomelo压测.md">
+                <i class="fa fa-chevron-left"></i> Pomelo压测.md
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/21/Python内存泄露查询/" rel="prev" title="Python内存泄露查询">
+                Python内存泄露查询 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
 
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -521,6 +382,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -734,6 +599,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
