@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="无论用什么语言来实现需求，最后基本都会需要对代码运行时间进行优化，降低cpu占用率  这里主要介绍两个profile工具：  cProfile：用cProfile生成程序运行时的profile文件，用python pyprof2calltree.py -i file生成文件供QCacheGrind读取；然后用qcachegrind.exe查看，可以看到图像化的代码情况，面积表示cpu占比，可以很">
+<meta name="description" content="最近在看《软技能：代码之外的生存指南》，作者分享他自己的学习方法——十步学习法。自己感觉平时学习新技术套路大致也是这样，不过自己并没有做过细致的总结和归纳，这里做一个简单的摘录和分享，详细情况可以去阅读原作，作者是一位充满激情、兴趣广泛、热爱生活、热爱思考而小有成就的技术人员，书本与技术有关，而不局限于技术，对任何人都有借鉴意义。  十步学习法了解全局确定范围定义目标寻找资源创建学习计划筛选资源">
 <meta property="og:type" content="article">
-<meta property="og:title" content="PythonCPU诊断优化">
-<meta property="og:url" content="http://liangiter.top/2018/09/21/PythonCPU诊断优化/index.html">
+<meta property="og:title" content="十步学习法">
+<meta property="og:url" content="http://liangiter.top/2018/09/25/十步学习法/index.html">
 <meta property="og:site_name" content="LiangIter">
-<meta property="og:description" content="无论用什么语言来实现需求，最后基本都会需要对代码运行时间进行优化，降低cpu占用率  这里主要介绍两个profile工具：  cProfile：用cProfile生成程序运行时的profile文件，用python pyprof2calltree.py -i file生成文件供QCacheGrind读取；然后用qcachegrind.exe查看，可以看到图像化的代码情况，面积表示cpu占比，可以很">
+<meta property="og:description" content="最近在看《软技能：代码之外的生存指南》，作者分享他自己的学习方法——十步学习法。自己感觉平时学习新技术套路大致也是这样，不过自己并没有做过细致的总结和归纳，这里做一个简单的摘录和分享，详细情况可以去阅读原作，作者是一位充满激情、兴趣广泛、热爱生活、热爱思考而小有成就的技术人员，书本与技术有关，而不局限于技术，对任何人都有借鉴意义。  十步学习法了解全局确定范围定义目标寻找资源创建学习计划筛选资源">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-09-21T07:41:52.348Z">
+<meta property="og:updated_time" content="2018-09-25T13:04:34.276Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="PythonCPU诊断优化">
-<meta name="twitter:description" content="无论用什么语言来实现需求，最后基本都会需要对代码运行时间进行优化，降低cpu占用率  这里主要介绍两个profile工具：  cProfile：用cProfile生成程序运行时的profile文件，用python pyprof2calltree.py -i file生成文件供QCacheGrind读取；然后用qcachegrind.exe查看，可以看到图像化的代码情况，面积表示cpu占比，可以很">
+<meta name="twitter:title" content="十步学习法">
+<meta name="twitter:description" content="最近在看《软技能：代码之外的生存指南》，作者分享他自己的学习方法——十步学习法。自己感觉平时学习新技术套路大致也是这样，不过自己并没有做过细致的总结和归纳，这里做一个简单的摘录和分享，详细情况可以去阅读原作，作者是一位充满激情、兴趣广泛、热爱生活、热爱思考而小有成就的技术人员，书本与技术有关，而不局限于技术，对任何人都有借鉴意义。  十步学习法了解全局确定范围定义目标寻找资源创建学习计划筛选资源">
 
 
 
@@ -119,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://liangiter.top/2018/09/21/PythonCPU诊断优化/"/>
+  <link rel="canonical" href="http://liangiter.top/2018/09/25/十步学习法/"/>
 
 
 
 
 
-  <title>PythonCPU诊断优化 | LiangIter</title>
+  <title>十步学习法 | LiangIter</title>
   
 
 
@@ -242,7 +242,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://liangiter.top/2018/09/21/PythonCPU诊断优化/">
+    <link itemprop="mainEntityOfPage" href="http://liangiter.top/2018/09/25/十步学习法/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Liang">
@@ -259,7 +259,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">PythonCPU诊断优化</h1>
+          <h1 class="post-title" itemprop="name headline">十步学习法</h1>
         
 
         <div class="post-meta">
@@ -271,8 +271,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-21T15:40:02+08:00">
-                2018-09-21
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-25T19:59:29+08:00">
+                2018-09-25
               </time>
             
 
@@ -310,15 +310,9 @@
 
       
         <blockquote>
-<p>无论用什么语言来实现需求，最后基本都会需要对代码运行时间进行优化，降低cpu占用率</p>
+<p>最近在看《软技能：代码之外的生存指南》，作者分享他自己的学习方法——十步学习法。自己感觉平时学习新技术套路大致也是这样，不过自己并没有做过细致的总结和归纳，这里做一个简单的摘录和分享，详细情况可以去阅读原作，作者是一位充满激情、兴趣广泛、热爱生活、热爱思考而小有成就的技术人员，书本与技术有关，而不局限于技术，对任何人都有借鉴意义。</p>
 </blockquote>
-<p>这里主要介绍两个profile工具：</p>
-<ol>
-<li>cProfile：用cProfile生成程序运行时的profile文件，用<code>python pyprof2calltree.py -i file</code>生成文件供QCacheGrind读取；然后用qcachegrind.exe查看，可以看到图像化的代码情况，面积表示cpu占比，可以很方便的找到cpu占比高的代码来进行优化。</li>
-<li>vmprof：vmprof支持pypy，先用vmprof生成profile文件（<code>pypy -m vmprof -o log.jit example.py</code>），用<code>vmprofshow log.jit</code>来查看代码占用cpu情况；</li>
-</ol>
-<p>cprofile图形化结果更加强大，但是不支持pypy。</p>
-
+<h2 id="十步学习法"><a href="#十步学习法" class="headerlink" title="十步学习法"></a>十步学习法</h2><h3 id="了解全局"><a href="#了解全局" class="headerlink" title="了解全局"></a>了解全局</h3><h3 id="确定范围"><a href="#确定范围" class="headerlink" title="确定范围"></a>确定范围</h3><h3 id="定义目标"><a href="#定义目标" class="headerlink" title="定义目标"></a>定义目标</h3><h3 id="寻找资源"><a href="#寻找资源" class="headerlink" title="寻找资源"></a>寻找资源</h3><h3 id="创建学习计划"><a href="#创建学习计划" class="headerlink" title="创建学习计划"></a>创建学习计划</h3><h3 id="筛选资源"><a href="#筛选资源" class="headerlink" title="筛选资源"></a>筛选资源</h3><h3 id="开始学习，浅尝辄止"><a href="#开始学习，浅尝辄止" class="headerlink" title="开始学习，浅尝辄止"></a>开始学习，浅尝辄止</h3><h3 id="动手操作，边学边玩"><a href="#动手操作，边学边玩" class="headerlink" title="动手操作，边学边玩"></a>动手操作，边学边玩</h3><h3 id="全面掌握，学以致用"><a href="#全面掌握，学以致用" class="headerlink" title="全面掌握，学以致用"></a>全面掌握，学以致用</h3><h3 id="了为人师，融会贯通"><a href="#了为人师，融会贯通" class="headerlink" title="了为人师，融会贯通"></a>了为人师，融会贯通</h3>
       
     </div>
     
@@ -342,8 +336,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/09/21/pomelo压测/" rel="next" title="Pomelo压测.md">
-                <i class="fa fa-chevron-left"></i> Pomelo压测.md
+              <a href="/2018/09/25/垃圾回收机制/" rel="next" title="垃圾回收机制">
+                <i class="fa fa-chevron-left"></i> 垃圾回收机制
               </a>
             
           </div>
@@ -351,10 +345,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/09/21/Python内存泄露查询/" rel="prev" title="Python内存泄露查询">
-                Python内存泄露查询 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -406,8 +396,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -465,6 +464,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#十步学习法"><span class="nav-number">1.</span> <span class="nav-text">十步学习法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#了解全局"><span class="nav-number">1.1.</span> <span class="nav-text">了解全局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#确定范围"><span class="nav-number">1.2.</span> <span class="nav-text">确定范围</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定义目标"><span class="nav-number">1.3.</span> <span class="nav-text">定义目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#寻找资源"><span class="nav-number">1.4.</span> <span class="nav-text">寻找资源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建学习计划"><span class="nav-number">1.5.</span> <span class="nav-text">创建学习计划</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#筛选资源"><span class="nav-number">1.6.</span> <span class="nav-text">筛选资源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#开始学习，浅尝辄止"><span class="nav-number">1.7.</span> <span class="nav-text">开始学习，浅尝辄止</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动手操作，边学边玩"><span class="nav-number">1.8.</span> <span class="nav-text">动手操作，边学边玩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#全面掌握，学以致用"><span class="nav-number">1.9.</span> <span class="nav-text">全面掌握，学以致用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#了为人师，融会贯通"><span class="nav-number">1.10.</span> <span class="nav-text">了为人师，融会贯通</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
