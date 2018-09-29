@@ -14,7 +14,10 @@ hexo g && hexo d
 ## 清理
 hexo clean
 
+## 增加新页面
+hexo new page "tags"
 
+## 域名
 github: https://liangiter.github.io/<br>
 coding: LiangIter.coding.me/liangiter.coding.me<br>
 domain: liangiter.top<br>
