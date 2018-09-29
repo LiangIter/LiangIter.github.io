@@ -82,21 +82,21 @@
 <meta name="description" content="近期公司技术分享讲座十分火热，近期我做了有关垃圾回收机制的分享，整理一下文档  垃圾回收背景 John McCarthy 身为 Lisp 之父和人工智能之父，同时，他也是 GC 之父。1960 年，他在其论文中首次发布了 GC 算法（其实是委婉的提出😂）。而 Java 的前身 Oak 是在 1990 发布的，利用 JVM 实现了跨平台。GC 因此一举成名。  垃圾回收基本概念基本概念:  全集">
 <meta property="og:type" content="article">
 <meta property="og:title" content="垃圾回收机制">
-<meta property="og:url" content="https://xiuxiuing.gitee.io/blog/2018/09/25/垃圾回收机制/index.html">
+<meta property="og:url" content="http://yoursite.com/2018/09/25/垃圾回收机制/index.html">
 <meta property="og:site_name" content="LiangIter">
 <meta property="og:description" content="近期公司技术分享讲座十分火热，近期我做了有关垃圾回收机制的分享，整理一下文档  垃圾回收背景 John McCarthy 身为 Lisp 之父和人工智能之父，同时，他也是 GC 之父。1960 年，他在其论文中首次发布了 GC 算法（其实是委婉的提出😂）。而 Java 的前身 Oak 是在 1990 发布的，利用 JVM 实现了跨平台。GC 因此一举成名。  垃圾回收基本概念基本概念:  全集">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://xiuxiuing.gitee.io/blog/2018/09/25/垃圾回收机制/reachable.png">
-<meta property="og:image" content="https://xiuxiuing.gitee.io/blog/2018/09/25/垃圾回收机制/ref_count.png">
-<meta property="og:image" content="https://xiuxiuing.gitee.io/blog/2018/09/25/垃圾回收机制/ref_count2.png">
-<meta property="og:image" content="https://xiuxiuing.gitee.io/blog/2018/09/25/垃圾回收机制/copy.png">
-<meta property="og:image" content="https://xiuxiuing.gitee.io/blog/2018/09/25/垃圾回收机制/relocate.png">
-<meta property="og:image" content="https://xiuxiuing.gitee.io/blog/2018/09/25/垃圾回收机制/obj_graph.png">
+<meta property="og:image" content="http://yoursite.com/2018/09/25/垃圾回收机制/reachable.png">
+<meta property="og:image" content="http://yoursite.com/2018/09/25/垃圾回收机制/ref_count.png">
+<meta property="og:image" content="http://yoursite.com/2018/09/25/垃圾回收机制/ref_count2.png">
+<meta property="og:image" content="http://yoursite.com/2018/09/25/垃圾回收机制/copy.png">
+<meta property="og:image" content="http://yoursite.com/2018/09/25/垃圾回收机制/relocate.png">
+<meta property="og:image" content="http://yoursite.com/2018/09/25/垃圾回收机制/obj_graph.png">
 <meta property="og:updated_time" content="2018-09-25T09:56:23.021Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="垃圾回收机制">
 <meta name="twitter:description" content="近期公司技术分享讲座十分火热，近期我做了有关垃圾回收机制的分享，整理一下文档  垃圾回收背景 John McCarthy 身为 Lisp 之父和人工智能之父，同时，他也是 GC 之父。1960 年，他在其论文中首次发布了 GC 算法（其实是委婉的提出😂）。而 Java 的前身 Oak 是在 1990 发布的，利用 JVM 实现了跨平台。GC 因此一举成名。  垃圾回收基本概念基本概念:  全集">
-<meta name="twitter:image" content="https://xiuxiuing.gitee.io/blog/2018/09/25/垃圾回收机制/reachable.png">
+<meta name="twitter:image" content="http://yoursite.com/2018/09/25/垃圾回收机制/reachable.png">
 
 
 
@@ -126,7 +126,7 @@
 
 
 
-  <link rel="canonical" href="https://xiuxiuing.gitee.io/blog/2018/09/25/垃圾回收机制/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/09/25/垃圾回收机制/"/>
 
 
 
@@ -249,7 +249,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://xiuxiuing.gitee.io/blog/blog/2018/09/25/垃圾回收机制/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/2018/09/25/垃圾回收机制/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Liang">
@@ -361,7 +361,7 @@
 </ul>
 <h4 id="可达对象集合"><a href="#可达对象集合" class="headerlink" title="可达对象集合"></a>可达对象集合</h4><ul>
 <li>根集的对象</li>
-<li>通过可达对象,利用引用关系遍历到的所有对象<br><img src="/blog/2018/09/25/垃圾回收机制/reachable.png" alt="imag"></li>
+<li>通过可达对象,利用引用关系遍历到的所有对象<br><img src="/2018/09/25/垃圾回收机制/reachable.png" alt="imag"></li>
 </ul>
 <h4 id="不可达到的对象集合"><a href="#不可达到的对象集合" class="headerlink" title="不可达到的对象集合"></a>不可达到的对象集合</h4><ul>
 <li>全集与可达对象集合差集</li>
@@ -429,7 +429,7 @@
 </ul>
 </li>
 </ul>
-<p><img src="/blog/2018/09/25/垃圾回收机制/ref_count.png" alt="imag"></p>
+<p><img src="/2018/09/25/垃圾回收机制/ref_count.png" alt="imag"></p>
 <p>优点</p>
 <ul>
 <li>思路简单，实现简单，是这个算法的一大优点.</li>
@@ -442,15 +442,15 @@
 <li>标记-清除操作时间消耗较大，程序会顿卡</li>
 <li>对象不可达后，销毁有延时</li>
 </ul>
-<p><img src="/blog/2018/09/25/垃圾回收机制/ref_count2.png" alt="imag"></p>
+<p><img src="/2018/09/25/垃圾回收机制/ref_count2.png" alt="imag"></p>
 <h4 id="复制算法"><a href="#复制算法" class="headerlink" title="复制算法"></a>复制算法</h4><p>在复制算法中，先将内存分为两个部分，From 区和 To 区，两部分大小相等。对象分配时，只会在 From 区进行分配。复制算法可以分两步，第一步为类似标记清除算法的标记，在 From 区中，找出所有活动的对象。区别在于第二步。复制算法会把这些活动的对象，复制到 To 区中，再将原有的 From 区全部清空，并交换两部分内存的职责，即一次 GC 后，原有的 From 区会成为 To 区，To 区相反。</p>
-<p><img src="/blog/2018/09/25/垃圾回收机制/copy.png" alt="imag"></p>
+<p><img src="/2018/09/25/垃圾回收机制/copy.png" alt="imag"></p>
 <p>优点<br>复制算法的优点相比于另外两个算法还是多一些的：</p>
 <p>效率快：相比于标记清除算法，复制算法在标记阶段，只需要标记哪些对象是活动的就可以了，相比于标记清除算法需要遍历所有的对象，性能上有提升不会发生碎片化：同样相比于标记清除算法，由于存活下来的对象会在 To 区中连续的分配，因此不会像标记清除算法那样，需要维护碎片空间分配速度快：由于不会发生碎片化，如果有一个新的对象请求内存，那么分配时可以直接追加在 From 区已用内存之后，分配的速度快.</p>
 <p>缺点<br>同样复制算法也不是十全十美，它也有着如下的缺点：内存使用率低：由于复制算法把内存分成了两块，那么对于对象的可用空间来说，仅仅是其他算法的一半自对象的递归复制：一个对象通常会关联一些自对象。在复制这些对象的时候，还需要递归的去处理它的自对象，这通常会产生一定的开销。同时，在递归调用时，存在着函数栈的消耗，潜藏着栈溢出的风险</p>
 <h4 id="重定位"><a href="#重定位" class="headerlink" title="重定位"></a>重定位</h4><ul>
 <li>不可到达对象在内存中是分散的，回收对象后，空闲内存是分段的</li>
-<li>移动可到达的堆对象，保持内存连续<br><img src="/blog/2018/09/25/垃圾回收机制/relocate.png" alt="imag"></li>
+<li>移动可到达的堆对象，保持内存连续<br><img src="/2018/09/25/垃圾回收机制/relocate.png" alt="imag"></li>
 </ul>
 <h4 id="分代算法"><a href="#分代算法" class="headerlink" title="分代算法"></a>分代算法</h4><ul>
 <li>销毁的总是年轻的对象<br>— 统计表明：80%-90%新分配的对象会在随后几百万条指令周期内销毁</li>
@@ -514,7 +514,7 @@
 <p>gc.DEBUG_SAVEALL When set, all unreachable objects found will be appended to garbage rather than being freed. This can be useful for debugging a leaking program.</p>
 </blockquote>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gc.set_debug(gc.DEBUG_SAVEALL)</span><br><span class="line">gc.collect()</span><br><span class="line">print(gc.garbage)</span><br></pre></td></tr></table></figure>
-<p>上面的方法可以找到垃圾对象，但要靠自己去找到对象间的引用情况来解除引用。利用 objgraph 可以找到对象的引用关系链并生成图。但是在实践中，进程中对象数量较大时，objgraph 经常会慢到让人想要原地自爆。也可以自己编写工具，在 gc.garbage 做图的遍历，找到所有的环引用，这样会比较全比较快。(TODO: 待分享通过gc.garbage查环工具代码)<br><img src="/blog/2018/09/25/垃圾回收机制/obj_graph.png" alt="imag"></p>
+<p>上面的方法可以找到垃圾对象，但要靠自己去找到对象间的引用情况来解除引用。利用 objgraph 可以找到对象的引用关系链并生成图。但是在实践中，进程中对象数量较大时，objgraph 经常会慢到让人想要原地自爆。也可以自己编写工具，在 gc.garbage 做图的遍历，找到所有的环引用，这样会比较全比较快。(TODO: 待分享通过gc.garbage查环工具代码)<br><img src="/2018/09/25/垃圾回收机制/obj_graph.png" alt="imag"></p>
 <blockquote>
 <p>gc.garbage <br><br>A list of objects which the collector found to be unreachable but could not be freed (uncollectable objects). By default, this list contains only objects with <strong>del</strong>() methods. [1] Objects that have <strong>del</strong>() methods and are part of a reference cycle cause the entire reference cycle to be uncollectable, including objects not necessarily in the cycle but reachable only from it. Python doesn’t collect such cycles automatically because, in general, it isn’t possible for Python to guess a safe order in which to run the <strong>del</strong>() methods. If you know a safe order, you can force the issue by examining the garbage list, and explicitly breaking cycles due to your objects within the list. Note that these objects are kept alive even so by virtue of being in the garbage list, so they should be removed from garbage too. For example, after breaking cycles, do del gc.garbage[:] to empty the list. It’s generally better to avoid the issue by not creating cycles containing objects with <strong>del</strong>() methods, and garbage can be examined in that case to verify that no such cycles are being created.</p>
 </blockquote>
