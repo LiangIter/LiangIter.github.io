@@ -14,8 +14,8 @@ hexo g && hexo d
 ## 清理
 hexo clean
 
-## 增加新页面
-hexo new page "tags"
+## 增加新md
+hexo new "tags"
 
 ## 域名
 github: https://liangiter.github.io/<br>
