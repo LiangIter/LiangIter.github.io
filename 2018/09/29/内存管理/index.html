@@ -81,14 +81,19 @@
 
 
 
+<meta name="description" content="背景 内存管理不恰当，会有造成大量内存碎片、内存分配效率低、内存实际使用率低。在程序运行中，这些问题会导致程序无法持久正常运行，于服务器技术而言更是如此。  目标内存管理可以分为三个层次，自底向上分别是：  操作系统内核的内存管理 使用系统调用维护的内存管理算法 在上一步基础上，根据应用程序本身的程序特性进行优化， 比如使用引用计数、内存池方式等  本文我们主要讨论第二步的使用系统调用维护的内存管">
 <meta property="og:type" content="article">
 <meta property="og:title" content="内存管理">
 <meta property="og:url" content="http://liangiter.top/2018/09/29/内存管理/index.html">
 <meta property="og:site_name" content="LiangIter">
+<meta property="og:description" content="背景 内存管理不恰当，会有造成大量内存碎片、内存分配效率低、内存实际使用率低。在程序运行中，这些问题会导致程序无法持久正常运行，于服务器技术而言更是如此。  目标内存管理可以分为三个层次，自底向上分别是：  操作系统内核的内存管理 使用系统调用维护的内存管理算法 在上一步基础上，根据应用程序本身的程序特性进行优化， 比如使用引用计数、内存池方式等  本文我们主要讨论第二步的使用系统调用维护的内存管">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-09-29T11:28:14.642Z">
+<meta property="og:image" content="http://liangiter.top/2018/09/29/内存管理/memcached内存结构图.png">
+<meta property="og:updated_time" content="2018-10-09T01:47:43.779Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="内存管理">
+<meta name="twitter:description" content="背景 内存管理不恰当，会有造成大量内存碎片、内存分配效率低、内存实际使用率低。在程序运行中，这些问题会导致程序无法持久正常运行，于服务器技术而言更是如此。  目标内存管理可以分为三个层次，自底向上分别是：  操作系统内核的内存管理 使用系统调用维护的内存管理算法 在上一步基础上，根据应用程序本身的程序特性进行优化， 比如使用引用计数、内存池方式等  本文我们主要讨论第二步的使用系统调用维护的内存管">
+<meta name="twitter:image" content="http://liangiter.top/2018/09/29/内存管理/memcached内存结构图.png">
 
 
 
@@ -312,7 +317,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  0 字
+                  1.2k 字
                 </span>
               
 
@@ -328,7 +333,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  1 分钟
+                  4 分钟
                 </span>
               
             </div>
@@ -349,7 +354,46 @@
       
 
       
-        
+        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><blockquote>
+<p>内存管理不恰当，会有造成大量内存碎片、内存分配效率低、内存实际使用率低。在程序运行中，这些问题会导致程序无法持久正常运行，于服务器技术而言更是如此。</p>
+</blockquote>
+<h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>内存管理可以分为三个层次，自底向上分别是：</p>
+<ul>
+<li>操作系统内核的内存管理</li>
+<li>使用系统调用维护的内存管理算法</li>
+<li>在上一步基础上，根据应用程序本身的程序特性进行优化， 比如使用引用计数、内存池方式等</li>
+</ul>
+<p><strong>本文我们主要讨论第二步的使用系统调用维护的内存管理算法</strong></p>
+<p>对于需要持久运行的程序而言，内存管理十分重要，一个优秀的内存管理策略应该具有如下特性：</p>
+<ul>
+<li>分配速度尽可能快</li>
+<li>内存碎片尽可能少</li>
+<li>内存实际使用率高</li>
+</ul>
+<h3 id="memcached内存管理机制"><a href="#memcached内存管理机制" class="headerlink" title="memcached内存管理机制"></a>memcached内存管理机制</h3><blockquote>
+<p>memcached是一个知名的高效的分布式内存cache，默认使用SlabAllocation机制管理内存，其主要思想是按照预先规定的大小，将分配的内存分割成特定长度的块以存储相应长度的key-value数据记录，以完全解决内存碎片问题。</p>
+</blockquote>
+<p>Slab和Chunk<br><br><img src="/2018/09/29/内存管理/memcached内存结构图.png" alt="memcached内存结构图"><br><br>slab是memcached一次申请内存的最小单位。memcached启动时使用参数-m指定其可用内存，但并不是启动时所有的内存就全部分配出去了，只有在需要时才会去申请，而且每次申请一定是一个slab。Slab的大小固定为1M（1048576 Byte）。</p>
+<p>一个slab由若干个大小相等的chunk组成。每个chunk中都保存了一个item结构体、一对key和value。</p>
+<p>虽然在同一个slab中chunk的大小相等的，但是在不同的slab中chunk的大小并不一定相等，在memcached中按照chunk的大小不同，可以把slab分为很多种类（class）。</p>
+<p>在启动memcached的时候可以通过-vv来查看slab的种类：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$ memcached -vv</span><br><span class="line">slab class <span class="number">1</span>: chunk size <span class="number">80</span> perslab <span class="number">13107</span></span><br><span class="line">slab class <span class="number">2</span>: chunk size <span class="number">104</span> perslab <span class="number">10082</span></span><br><span class="line">slab class <span class="number">3</span>: chunk size <span class="number">136</span> perslab <span class="number">7710</span></span><br><span class="line">slab class <span class="number">4</span>: chunk size <span class="number">176</span> perslab <span class="number">5957</span></span><br><span class="line">slab class <span class="number">5</span>: chunk size <span class="number">224</span> perslab <span class="number">4681</span></span><br><span class="line">slab class <span class="number">6</span>: chunk size <span class="number">280</span> perslab <span class="number">3744</span></span><br><span class="line">slab class <span class="number">7</span>: chunk size <span class="number">352</span> perslab <span class="number">2978</span></span><br><span class="line">slab class <span class="number">8</span>: chunk size <span class="number">440</span> perslab <span class="number">2383</span></span><br><span class="line">slab class <span class="number">9</span>: chunk size <span class="number">552</span> perslab <span class="number">1899</span></span><br><span class="line">slab class <span class="number">10</span>: chunk size <span class="number">696</span> perslab <span class="number">1506</span></span><br><span class="line">slab class <span class="number">11</span>: chunk size <span class="number">872</span> perslab <span class="number">1202</span></span><br><span class="line">slab class <span class="number">12</span>: chunk size <span class="number">1096</span> perslab <span class="number">956</span></span><br><span class="line">slab class <span class="number">13</span>: chunk size <span class="number">1376</span> perslab <span class="number">762</span></span><br><span class="line">.</span><br><span class="line">.</span><br><span class="line">.</span><br></pre></td></tr></table></figure>
+<p>向memcached添加item时，memcached首先会根据item大小，根据chunk size向上取整，来选择接近的slab class。例如，item大小为156，向上取最小的chunk size为176.</p>
+<p>memcached采取SlabAllocation策略，一次向系统申请1M空间内存作为slab。slab根据其chunk size分割成等大的内存块chunk，每个chunk都可以存储一个item。memcached内存分配做到了一次申请大量空间，分割多块给小对象多次使用，大大降低了向操作系统申请内存的时间，大部分内存管理机制都会用到这个策略。<br><br>其次，memcached将slab按chunk size分组，将每一个slab内部按chunk size分割成固定大小的内存块。固定大小的chunk，回收之后还可以用于下一次item的存储，内存的分布情况不会变的错综复杂，有利于减少内存碎片。chunk size递增策略，每一次item都向上取到最接近的chunk size对应的slab来存储，有利于提高其实际内存利用率<br></p>
+<h3 id="Redis内存管理机制"><a href="#Redis内存管理机制" class="headerlink" title="Redis内存管理机制"></a>Redis内存管理机制</h3><blockquote>
+<p>Redis默认使用jemalloc作为内存分配器。jemalloc 是一个通用的 malloc（3）实现，它强调了分段回避和可伸缩并发支持。jemalloc 在 2005 年首次作为 FreeBSD libc 分配器使用，2010年，jemalloc 的功能延伸到如堆分析和监控/调优等。现代的 jemalloc 版本依然集成在 FreeBSD 中。</p>
+</blockquote>
+<p>jemalloc机制相对memcached的SlabAllocation策略来说比较复杂，这里不做详细介绍，详情可参考本文列出的参考文档。</p>
+<p>类似的，对jemalloc策略总结如下：</p>
+<ul>
+<li>一次向系统申请大内存4M（chunk），供之后多次使用</li>
+<li>将控制的内存分成不同大小的小内存块（bins），重复使用</li>
+<li>存放对象时，向上找到最接近size的bin对应的空闲内存块来存储</li>
+<li>每个线程有自己的独立空间tcache，将内存划分为arena供线程使用，减少线程间的互斥访问</li>
+</ul>
+<p>前三条策略的思想与memcached的SlabAllocationc策略所蕴含的思想一致，第四条策略是针对多线程加速的优化。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a href="https://blog.csdn.net/junlon2006/article/details/77854898" target="_blank" rel="noopener"><strong>内存优化总结:ptmalloc、tcmalloc和jemalloc</strong></a><br><br><a href="https://blog.csdn.net/peerless_hero/article/details/77061927" target="_blank" rel="noopener"><strong>memcached的内存管理机制</strong></a><br><br><a href="https://www.cnblogs.com/gaoxing/p/4253833.html" target="_blank" rel="noopener"><strong>jemalloc和内存管里</strong></a><br><br><a href="https://people.freebsd.org/~jasone/jemalloc/bsdcan2006/jemalloc.pdf" target="_blank" rel="noopener"><strong>A Scalable Concurrent malloc(3) Implementation for FreeBSD</strong></a><br><br><a href="https://blog.csdn.net/koozxcv/article/details/50973217" target="_blank" rel="noopener"><strong>jemalloc内存分配器详解</strong></a><br></p>
+
       
     </div>
     
@@ -436,8 +480,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -506,6 +559,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#目标"><span class="nav-number">2.</span> <span class="nav-text">目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#memcached内存管理机制"><span class="nav-number">3.</span> <span class="nav-text">memcached内存管理机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis内存管理机制"><span class="nav-number">4.</span> <span class="nav-text">Redis内存管理机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
