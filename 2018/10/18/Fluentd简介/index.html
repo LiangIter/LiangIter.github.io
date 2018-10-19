@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LiangIter" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="最近公司想要统一管理各个项目的日志，也为以后日志可视化查询做一个铺垫。经过筛选，选择了fluentd来做日志的收集转发工作，预想利用EFK来做日志收集、查询、可视化的方案。啥？你问我为啥不用Logstash，可参考文章Fluentd vs. Logstash: A Comparison of Log Collectors ,两者差异并不大，Fluentd所占内存较小、社区更活跃。  Fluent">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fluentd简介">
+<meta property="og:url" content="http://liangiter.top/2018/10/18/Fluentd简介/index.html">
+<meta property="og:site_name" content="LiangIter">
+<meta property="og:description" content="最近公司想要统一管理各个项目的日志，也为以后日志可视化查询做一个铺垫。经过筛选，选择了fluentd来做日志的收集转发工作，预想利用EFK来做日志收集、查询、可视化的方案。啥？你问我为啥不用Logstash，可参考文章Fluentd vs. Logstash: A Comparison of Log Collectors ,两者差异并不大，Fluentd所占内存较小、社区更活跃。  Fluent">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://liangiter.top/2018/10/18/Fluentd简介/fluentd_1.jpg">
+<meta property="og:updated_time" content="2018-10-19T02:25:32.672Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Fluentd简介">
+<meta name="twitter:description" content="最近公司想要统一管理各个项目的日志，也为以后日志可视化查询做一个铺垫。经过筛选，选择了fluentd来做日志的收集转发工作，预想利用EFK来做日志收集、查询、可视化的方案。啥？你问我为啥不用Logstash，可参考文章Fluentd vs. Logstash: A Comparison of Log Collectors ,两者差异并不大，Fluentd所占内存较小、社区更活跃。  Fluent">
+<meta name="twitter:image" content="http://liangiter.top/2018/10/18/Fluentd简介/fluentd_1.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://liangiter.top/2018/10/18/Fluentd简介/"/>
+
+
+
+
+
+  <title>Fluentd简介 | LiangIter</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LiangIter</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://liangiter.top/2018/10/18/Fluentd简介/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Liang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/logo.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LiangIter">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Fluentd简介</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-18T09:12:03+08:00">
+                2018-10-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/18/Fluentd简介/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/18/Fluentd简介/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.5k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  6 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>最近公司想要统一管理各个项目的日志，也为以后日志可视化查询做一个铺垫。经过筛选，选择了fluentd来做日志的收集转发工作，预想利用EFK来做日志收集、查询、可视化的方案。<br><br>啥？你问我为啥不用Logstash，可参考文章<a href="https://logz.io/blog/fluentd-logstash/" target="_blank" rel="noopener">Fluentd vs. Logstash: A Comparison of Log Collectors
+</a><br>,两者差异并不大，Fluentd所占内存较小、社区更活跃。</p>
+</blockquote>
+<h3 id="Fluentd是什么？能解决什么问题？"><a href="#Fluentd是什么？能解决什么问题？" class="headerlink" title="Fluentd是什么？能解决什么问题？"></a>Fluentd是什么？能解决什么问题？</h3><p><a href="https://www.fluentd.org/" target="_blank" rel="noopener">官网简介</a>： Fluentd是一个用于统一日志层的开源数据收集器。Fluentd允许您统一数据收集和使用，以便更好地使用和理解数据。Fluentd是云端原生计算基金会(CNCF)的成员项目之一，遵循Apache 2 License协议<br><br>这我们应用中，Fluentd负责从游戏服务器收集日志信息，将数据流交给后续数据存盘、查询工具。换句话说，Fluentd不负责生产数据、不负责存储数据，只是数据的搬运工。</p>
+<ul>
+<li><strong>使用JSON进行统一日志记录</strong>：Fluentd尝试尽可能地将数据结构化为JSON：这允许Fluentd 统一处理日志数据的所有方面：收集，过滤，缓冲和跨多个源和目标（统一日志层）输出日志。使用JSON可以更轻松地进行下游数据处理，因为它具有足够的结构，可以在保留灵活模式的同时进行访问。</li>
+<li><strong>可插拔架构</strong>：Fluentd拥有灵活的插件系统，允许社区扩展其功能。我们的500多个社区贡献插件连接了数十个数据源和数据输出。通过利用插件，您可以立即开始更好地使用日志。</li>
+<li><strong>所需的资源较少</strong>： Fluentd是用C语言和Ruby组合编写的，只需要很少的系统资源。vanilla实例运行30-40MB内存，可处理13,000个事件/秒/核心。</li>
+<li><strong>内置可靠性</strong>：Fluentd支持基于内存和文件的缓冲，以防止节点间数据丢失。Fluentd还支持强大的故障转移功能，可以设置为高可用性。</li>
+</ul>
+<p>注：<a href="https://github.com/fluent/fluentd-benchmark/tree/master/one_forward" target="_blank" rel="noopener">fluentd-benchmark</a> 对简单数据<code>2014-02-20 17:20:55 +0900 [info]: plugin:out_flowcounter_simple count:500       indicator:num   unit:second</code>测压结果是157148次/s</p>
+<p><img src="/2018/10/18/Fluentd简介/fluentd_1.jpg" alt="fluentd log"><br>Fluentd解决数据流流向混乱的问题，通过在两者之间提供统一的日志记录层，从后端系统中分离数据源。</p>
+<h3 id="为什么要用Fluentd？"><a href="#为什么要用Fluentd？" class="headerlink" title="为什么要用Fluentd？"></a>为什么要用Fluentd？</h3><ul>
+<li>简单易用且灵活</li>
+<li>开源</li>
+<li>久经考验的可靠性和性能：5,000多家数据驱动型公司依靠Fluentd通过更好地使用和了解他们的日志数据来区分他们的产品和服务。</li>
+<li><a href="https://www.fluentd.org/community" target="_blank" rel="noopener">活跃的社区</a></li>
+<li>与Logstash相比占用内存更少、社区更活跃，两者比较可参考<a href="https://logz.io/blog/fluentd-logstash/" target="_blank" rel="noopener">Fluentd vs. Logstash: A Comparison of Log Collectors</a></li>
+</ul>
+<p>人气情况：</p>
+<ul>
+<li>github fluent/fluentd start 6.8k</li>
+<li>npm fluent-logger weekly downloads 11,493</li>
+</ul>
+<h3 id="Fluentd的用户："><a href="#Fluentd的用户：" class="headerlink" title="Fluentd的用户："></a>Fluentd的用户：</h3><ul>
+<li>Atlassian</li>
+<li>Microsoft</li>
+<li>amazon</li>
+<li>LINE</li>
+<li>PPTV</li>
+<li>…</li>
+</ul>
+<h4 id="fluentd安装"><a href="#fluentd安装" class="headerlink" title="fluentd安装"></a>fluentd安装</h4><p>fluentd安装、启动可参考<a href="https://docs.fluentd.org/v1.0/articles/quickstart" target="_blank" rel="noopener">Fluent doc</a></p>
+<h4 id="Fluentd配置"><a href="#Fluentd配置" class="headerlink" title="Fluentd配置"></a>Fluentd配置</h4><ul>
+<li>source: 数据源配置，可接受log-tail、http、tcp、udp等方式数据，</li>
+<li>filter: 数据过滤配置，对匹配的tag进行过滤</li>
+<li>match: 数据输出配置，对匹配的tag进行输出设置</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="built_in">source</span>&gt;</span><br><span class="line">  @<span class="built_in">type</span> tcp</span><br><span class="line">  tag tcp.events <span class="comment"># required</span></span><br><span class="line">  &lt;parse&gt;</span><br><span class="line">    @<span class="built_in">type</span> regexp</span><br><span class="line">    expression /^(?&lt;field1&gt;\d+):(?&lt;field2&gt;\w+)$/</span><br><span class="line">  &lt;/parse&gt;</span><br><span class="line">  port 5170   <span class="comment"># optional. 5170 by default</span></span><br><span class="line">  <span class="built_in">bind</span> 0.0.0.0 <span class="comment"># optional. 0.0.0.0 by default</span></span><br><span class="line">  delimiter \n <span class="comment"># optional. \n (newline) by default</span></span><br><span class="line">&lt;/<span class="built_in">source</span>&gt;</span><br></pre></td></tr></table></figure>
+<p>Example input:<br><br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">echo</span> <span class="string">'123456:awesome'</span> | netcat 0.0.0.0 5170</span><br></pre></td></tr></table></figure></p>
+<p>Parsed result like below:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="string">"field1"</span>:<span class="string">"123456"</span>,<span class="string">"field2"</span>:<span class="string">"awesome&#125;</span></span><br></pre></td></tr></table></figure></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## built-in TCP input</span></span><br><span class="line"><span class="comment">## @see http://docs.fluentd.org/articles/in_forward</span></span><br><span class="line">&lt;<span class="built_in">source</span>&gt;</span><br><span class="line">  @<span class="built_in">type</span> forward</span><br><span class="line">  @id input_forward</span><br><span class="line">  &lt;security&gt;</span><br><span class="line">    self_hostname input.local</span><br><span class="line">    shared_key liang_handsome</span><br><span class="line">  &lt;/security&gt;</span><br><span class="line">&lt;/<span class="built_in">source</span>&gt;</span><br><span class="line"></span><br><span class="line">&lt;filter example.*.*&gt;</span><br><span class="line">  @<span class="built_in">type</span> grep</span><br><span class="line">  regexp1 levelStr (INFO|WARN|ERROR)</span><br><span class="line">&lt;/filter&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Match events tagged with "myapp.access" and</span></span><br><span class="line"><span class="comment"># store them to /var/log/fluent/access.%Y-%m-%d</span></span><br><span class="line"><span class="comment"># Of course, you can control how you partition your data</span></span><br><span class="line"><span class="comment"># with the time_slice_format option.</span></span><br><span class="line">&lt;match example.*.*&gt;</span><br><span class="line">  @<span class="built_in">type</span> file</span><br><span class="line">  path E:\software\fluentd\td-agent\<span class="built_in">log</span>\output_file</span><br><span class="line">&lt;/match&gt;</span><br></pre></td></tr></table></figure>
+<p><code>fluentd更多配置请参考官网:https://docs.fluentd.org/v1.0/articles/config-file</code></p>
+<h3 id="fluent-logger配置"><a href="#fluent-logger配置" class="headerlink" title="fluent-logger配置"></a>fluent-logger配置</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;configure, getLogger, shutdown&#125; <span class="keyword">from</span> <span class="string">'log4js'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> fluentAppender = configure(&#123;</span><br><span class="line">  appenders: &#123;</span><br><span class="line">    <span class="string">"fluent"</span>: &#123;</span><br><span class="line">      <span class="string">"type"</span>: <span class="string">"log4js-fluent-appender"</span>,</span><br><span class="line">      <span class="string">"tag_prefix"</span>: <span class="string">"example.your_keys"</span>,</span><br><span class="line">      <span class="string">"options"</span>: &#123;</span><br><span class="line">        <span class="string">"levelTag"</span>: <span class="literal">true</span>,</span><br><span class="line">        <span class="string">"host"</span>: <span class="string">"localhost"</span>,</span><br><span class="line">        <span class="string">"port"</span>: <span class="number">24224</span>,</span><br><span class="line">        <span class="string">"timeout"</span>: <span class="number">3.0</span>,</span><br><span class="line">        <span class="string">"reconnectInterval"</span>: <span class="number">600000</span>,</span><br><span class="line">        <span class="string">"security"</span>: &#123;</span><br><span class="line">          <span class="string">"clientHostname"</span>: <span class="string">"client"</span>,</span><br><span class="line">          <span class="string">"sharedKey"</span>: <span class="string">"liang_handsome"</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  categories: &#123;</span><br><span class="line">    <span class="keyword">default</span>: &#123;</span><br><span class="line">      appenders: [<span class="string">'fluent'</span>],</span><br><span class="line">      level: <span class="string">'info'</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>如上配置，fluent-logger根据host、port连接fluentd，sharedKey作为连接认证</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">logger.info(&#123;<span class="attr">log_type</span>: <span class="string">"create-room"</span>, <span class="attr">uuid</span>: <span class="number">1112</span>, <span class="attr">room_id</span>: <span class="number">234</span>, <span class="attr">config</span>: &#123;<span class="attr">cards</span>: <span class="number">16</span>, <span class="attr">chairs</span>: <span class="number">3</span>&#125;&#125;);</span><br></pre></td></tr></table></figure>
+<p>fluentd输出为:<br><br><code>2018-10-18T10:50:38+08:00    example.your_keys.INFO    {&quot;timestamp&quot;:1539831038583.0,&quot;category&quot;:&quot;default&quot;,&quot;levelInt&quot;:20000,&quot;levelStr&quot;:&quot;INFO&quot;,&quot;context&quot;:{},&quot;data&quot;:&quot;log { log_type: &#39;create-room&#39;, uuid: 1112, room_id: 234 }&quot;}</code></p>
+<h3 id="JavaScript-fluent-logger缓存测试："><a href="#JavaScript-fluent-logger缓存测试：" class="headerlink" title="JavaScript fluent_logger缓存测试："></a>JavaScript fluent_logger缓存测试：</h3><ul>
+<li>在fluentd关闭的情况下，logger输出20条日志，开启fluentd，fluent-logger会自动连接上fluentd，并将缓存的20条log发送至fluentd</li>
+<li>正常连接fluentd，输出5条log。然后关闭fluentd，继续输出15条log，启动fluentd，fluent-logger自动连接上fluentd，并将缓存的15条log发送至fluentd</li>
+</ul>
+<p>以上测试表明fluentd-logger在与fluentd丢失连接时，相关log暂先会缓存起来，并在重连时将缓存的log发送至fluentd。这个机制相当优秀，大大增加了安全性，不过要注意缓存是占用内存的，如果长时间连接不上fluentd，有内存耗尽的风险。</p>
+<h3 id="日志解决方案实战"><a href="#日志解决方案实战" class="headerlink" title="日志解决方案实战"></a>日志解决方案实战</h3><p>可参考文档：<a href="https://blog.csdn.net/shiwenqing/article/details/50475330" target="_blank" rel="noopener">基于Elasticsearch+Fluentd+Kibana的日志收集分析系统搭建与应用</a><br></p>
+<h3 id="未来展望"><a href="#未来展望" class="headerlink" title="未来展望"></a>未来展望</h3><p>fluentd收集数据，可输出到hadoop中，利用数据做数据挖掘，可以实现很多有价值的目标。比如：</p>
+<ul>
+<li>监测用户行为，针对流失较高的点，优化流失率，提高留存</li>
+<li>监测消费行为，针对性营销，增加收入</li>
+<li>异常检测，发现数据异常情况，第一时间发现服务器逻辑漏洞</li>
+<li>消费数据挖掘，将消费者分类，同类消费者商品推荐</li>
+<li>发现即将流失客户，重点给与相关优惠吸引策略</li>
+<li>发现核心用户，重点关注</li>
+<li>…</li>
+</ul>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a href="https://www.fluentd.org/" target="_blank" rel="noopener">Fluent</a><br><br><a href="https://github.com/fluent/fluentd-benchmark/tree/master/one_forward" target="_blank" rel="noopener">fluentd-benchmark</a><br><br><a href="https://docs.fluentd.org/v1.0/articles/quickstart" target="_blank" rel="noopener">Fluent doc</a><br><br><a href="https://blog.csdn.net/shiwenqing/article/details/50475330" target="_blank" rel="noopener">基于Elasticsearch+Fluentd+Kibana的日志收集分析系统搭建与应用</a><br><br><a href="https://logz.io/blog/fluentd-logstash/" target="_blank" rel="noopener">Fluentd vs. Logstash: A Comparison of Log Collectors
+</a><br></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/29/内存管理/" rel="next" title="内存管理">
+                <i class="fa fa-chevron-left"></i> 内存管理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/logo.png"
+                alt="Liang" />
+            
+              <p class="site-author-name" itemprop="name">Liang</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="http://liangiter.top" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hl_hnu@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Fluentd是什么？能解决什么问题？"><span class="nav-number">1.</span> <span class="nav-text">Fluentd是什么？能解决什么问题？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么要用Fluentd？"><span class="nav-number">2.</span> <span class="nav-text">为什么要用Fluentd？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fluentd的用户："><span class="nav-number">3.</span> <span class="nav-text">Fluentd的用户：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#fluentd安装"><span class="nav-number">3.1.</span> <span class="nav-text">fluentd安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Fluentd配置"><span class="nav-number">3.2.</span> <span class="nav-text">Fluentd配置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fluent-logger配置"><span class="nav-number">4.</span> <span class="nav-text">fluent-logger配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JavaScript-fluent-logger缓存测试："><span class="nav-number">5.</span> <span class="nav-text">JavaScript fluent_logger缓存测试：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#日志解决方案实战"><span class="nav-number">6.</span> <span class="nav-text">日志解决方案实战</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#未来展望"><span class="nav-number">7.</span> <span class="nav-text">未来展望</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-number">8.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Liang</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'jKTabnedBRRxBo2rLXwFLBRs-gzGzoHsz',
+        appKey: '57GqmXJhb2wlnuVsLDzJteuX',
+        placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
