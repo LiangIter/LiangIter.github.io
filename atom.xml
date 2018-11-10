@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://liangiter.top/"/>
-  <updated>2018-10-19T02:25:32.672Z</updated>
+  <updated>2018-11-10T07:44:03.859Z</updated>
   <id>http://liangiter.top/</id>
   
   <author>
@@ -15,6 +15,55 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>电影推荐</title>
+    <link href="http://liangiter.top/2018/11/10/%E7%94%B5%E5%BD%B1%E6%8E%A8%E8%8D%90/"/>
+    <id>http://liangiter.top/2018/11/10/电影推荐/</id>
+    <published>2018-11-10T07:18:48.000Z</published>
+    <updated>2018-11-10T07:44:03.859Z</updated>
+    
+    <content type="html"><![CDATA[<blockquote><p>背景：最近公司要我们每人推荐一部电影，给公司所有人</p></blockquote><p>思来想去，电影看过不少，有创意、有思想、引人深思的电影不多，尤其还与程序员相关的，我首先想起了早年看到的《异次元骇客》。电影讲述一个计算机模拟的虚拟世界中与现实中的其设计者真实世界的交叉，一层一层的解密，真到最后真相大白，令人惊讶。<br><br>看完电影不禁想起一个问题：我是谁，我从何而来，我为什么会存在于这个世界？我们的生活是真实的还是被更高阶智能虚拟出来的呢？<br><br>意大利罗马市政府曾颁布一项奇特的条例，禁止市民用球形的鱼缸养金鱼，理由是，球形鱼缸会混淆鱼的视觉，会扭曲它们对真实世界的观察。但进一步讲，我们人类是否被更高阶智能养在叫做“宇宙”的容器内呢。金鱼在鱼缸中总结出来的鱼缸物理学能算作正确的物理学吗？我们所在的世界是三维的吗，虫洞又是怎么回事？人类对世界的了解，能真正反映真实的世界吗？<br><br>这让我想起霍金在《大设计》，书中讨论生命的来源是否需要上帝的参与，这反映了科学家对人类来源的做出的思考，其中很多观点令人眼界大开。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;blockquote&gt;
+&lt;p&gt;背景：最近公司要我们每人推荐一部电影，给公司所有人&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;思来想去，电影看过不少，有创意、有思想、引人深思的电影不多，尤其还与程序员相关的，我首先想起了早年看到的《异次元骇客》。电影讲述一个计算机模拟的虚拟世界中
+      
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Elasticsearch+Kibana</title>
+    <link href="http://liangiter.top/2018/10/30/Elasticsearch-Kibana/"/>
+    <id>http://liangiter.top/2018/10/30/Elasticsearch-Kibana/</id>
+    <published>2018-10-30T09:36:05.000Z</published>
+    <updated>2018-11-10T07:17:47.775Z</updated>
+    
+    <content type="html"><![CDATA[<blockquote><p>上篇文章介绍了介绍了Fluentd以及EFK机制，最近了解了Elasticsearch，在这里做一个总结</p></blockquote><blockquote><p>Elasticsearch is a search engine based on Lucene. It provides a distributed, multitenant-capable full-text search engine with an HTTP web interface and schema-free JSON documents. Elasticsearch is developed in Java and is released as open source under the terms of the Apache License. Official clients are available in Java, .NET (C#), PHP, Python, Apache Groovy, Ruby and many other languages. According to the DB-Engines ranking, Elasticsearch is the most popular enterprise search engine followed by Apache Solr, also based on Lucene.<br><br><br>Elasticsearch是一个基于Lucene的搜索引擎。它提供了一个分布式、多用户全文搜索引擎，有着HTTP Web界面和无结构JSON文档。Elasticsearch是用Java开发的，并根据Apache License的条款作为开源发布。官方客户端有Java，.NET（C＃），PHP，Python，Apache Groovy，Ruby和许多其他语言版本。根据DB-Engines排名，Elasticsearch是最受欢迎的企业搜索引擎，后面是基于Lucene的Apache Solr。——摘自维基百科</p></blockquote><p>什么是全文搜索？全文检索是指计算机索引程序通过扫描文章中的每一个词，对每一个词建立一个索引，根据索引可以找到文档。我们使用的百度、谷歌等搜索引擎，就是基于这个技术对所有爬取的万维网网页做拆分建立建立全文索引，当我们输入关键字时给我们展现相关的页面。当然，商业搜索引擎还采用竞价排名、PageRank等复杂的算法。</p><p>Elasticsearch是基于开源库Lucene的封装，Lucenej接口使用较为复杂，Elasticsearch使用会更加简单。要明白Elasticsearch机制，首先得搞清楚Lucene是什么。</p><blockquote><p>Lucene是apache软件基金会4 jakarta项目组的一个子项目，是一个开放源代码的全文检索引擎工具包，但它不是一个完整的全文检索引擎，而是一个全文检索引擎的架构，提供了完整的查询引擎和索引引擎，部分文本分析引擎（英文与德文两种西方语言）。Lucene的目的是为软件开发人员提供一个简单易用的工具包，以方便的在目标系统中实现全文检索的功能，或者是以此为基础建立起完整的全文检索引擎。 ——摘自百度百科</p></blockquote><p>Lucene全词匹配索引的关键技术是用到了FST(Finite State Transducer)——有穷状态转换器。在自然语言处理等领域有很大应用，其功能类似于字典的功能（STL 中的map，C# 中的Dictionary），但其查找是O（1）的，仅仅等于所查找的key长度。目前Lucene4.0在查找Term时就用到了该算法来确定此Term在字典中的位置。<br>关于FST的介绍，可以看这篇博文<a href="https://blog.csdn.net/J_bean/article/details/78660252" target="_blank" rel="noopener">lucene源代码学习之FST(Finite State Transducer)在SynonymFilter中的实现思想</a></p><h3 id="Kibana使用"><a href="#Kibana使用" class="headerlink" title="Kibana使用"></a>Kibana使用</h3><p><img src="/2018/10/30/Elasticsearch-Kibana/kibana.jpg" alt="kibana"><br><img src="/2018/10/30/Elasticsearch-Kibana/kibana2.png" alt="kibana"><br>搜索102246，页面呈现包含搜索字段结果，上方还有以时间为横坐标、log条目为纵坐标的柱状图。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;blockquote&gt;
+&lt;p&gt;上篇文章介绍了介绍了Fluentd以及EFK机制，最近了解了Elasticsearch，在这里做一个总结&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Elasticsearch is a search engine base
+      
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>Fluentd简介</title>

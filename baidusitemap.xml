@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://liangiter.top/2018/11/10/%E7%94%B5%E5%BD%B1%E6%8E%A8%E8%8D%90/</loc>
+    <lastmod>2018-11-10T07:44:03.859Z</lastmod>
+  </url>  <url>
+    <loc>http://liangiter.top/2018/10/30/Elasticsearch-Kibana/</loc>
+    <lastmod>2018-11-10T07:17:47.775Z</lastmod>
+  </url>  <url>
     <loc>http://liangiter.top/2018/10/18/Fluentd%E7%AE%80%E4%BB%8B/</loc>
     <lastmod>2018-10-19T02:25:32.672Z</lastmod>
   </url>  <url>
