@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LiangIter" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="Goland的值与引用类型 在新的项目中，用到的Goland。以前用Python做项目，Python基本变量的赋值是引用重定向。Goland有些不一样，这里做个测试直接利用打印变量值、地址的方式确认变量拷贝情况  123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Goland的值与引用类型">
+<meta property="og:url" content="http://liangiter.top/2019/06/26/Goland的值与引用类型/index.html">
+<meta property="og:site_name" content="LiangIter">
+<meta property="og:description" content="Goland的值与引用类型 在新的项目中，用到的Goland。以前用Python做项目，Python基本变量的赋值是引用重定向。Goland有些不一样，这里做个测试直接利用打印变量值、地址的方式确认变量拷贝情况  123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-06-26T13:35:03.639Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Goland的值与引用类型">
+<meta name="twitter:description" content="Goland的值与引用类型 在新的项目中，用到的Goland。以前用Python做项目，Python基本变量的赋值是引用重定向。Goland有些不一样，这里做个测试直接利用打印变量值、地址的方式确认变量拷贝情况  123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://liangiter.top/2019/06/26/Goland的值与引用类型/"/>
+
+
+
+
+
+  <title>Goland的值与引用类型 | LiangIter</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LiangIter</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://liangiter.top/2019/06/26/Goland的值与引用类型/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Liang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/logo.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LiangIter">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Goland的值与引用类型</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-26T20:37:01+08:00">
+                2019-06-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/06/26/Goland的值与引用类型/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/06/26/Goland的值与引用类型/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  972 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  4 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="Goland的值与引用类型"><a href="#Goland的值与引用类型" class="headerlink" title="Goland的值与引用类型"></a>Goland的值与引用类型</h3><blockquote>
+<p>在新的项目中，用到的Goland。以前用Python做项目，Python基本变量的赋值是引用重定向。Goland有些不一样，这里做个测试<br><br>直接利用打印变量值、地址的方式确认变量拷贝情况<br></p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">getInt</span><span class="params">()</span> <span class="title">int</span></span> &#123;</span><br><span class="line">	i := <span class="number">5</span></span><br><span class="line">	<span class="built_in">println</span>(<span class="string">"in getInt, i"</span>, i, &amp;i)</span><br><span class="line">	<span class="keyword">return</span> i</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">intTest</span><span class="params">(i <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="built_in">println</span>(<span class="string">"in intTest, i"</span>, i, &amp;i)</span><br><span class="line">	i = <span class="number">99</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">listTest</span><span class="params">(list []<span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="built_in">println</span>(<span class="string">"in listTest, list"</span>, &amp;list, list)</span><br><span class="line">	list[<span class="number">0</span>] = <span class="number">99</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">mapTest</span><span class="params">(mapInt <span class="keyword">map</span>[<span class="keyword">int</span>]<span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="built_in">println</span>(<span class="string">"in mapTest, mapInt"</span>, mapInt, &amp;mapInt)</span><br><span class="line">	mapInt[<span class="number">99</span>] = <span class="number">100</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	t := <span class="number">1</span></span><br><span class="line">	fmt.Println(<span class="string">"in main, t"</span>, t, &amp;t)</span><br><span class="line">	t = <span class="number">2</span></span><br><span class="line">	fmt.Println(<span class="string">"in main, t"</span>, t, &amp;t)</span><br><span class="line">	t = getInt()</span><br><span class="line">	fmt.Println(<span class="string">"in main, t"</span>, t, &amp;t)</span><br><span class="line">	intTest(t)</span><br><span class="line">	fmt.Println(<span class="string">"in main, t"</span>, t, &amp;t)</span><br><span class="line"></span><br><span class="line">	fmt.Println(<span class="string">"*************************"</span>)</span><br><span class="line">	l := []<span class="keyword">int</span>&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;</span><br><span class="line">	<span class="built_in">println</span>(<span class="string">"in main, l"</span>, &amp;l, l)</span><br><span class="line">	l = []<span class="keyword">int</span>&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>&#125;</span><br><span class="line">	<span class="built_in">println</span>(<span class="string">"in main, l"</span>, &amp;l, l)</span><br><span class="line"></span><br><span class="line">	l2 := l</span><br><span class="line">	<span class="built_in">println</span>(<span class="string">"in main, l2"</span>, &amp;l2, l2)</span><br><span class="line">	listTest(l)</span><br><span class="line">	fmt.Println(<span class="string">"in main, l"</span>, l)</span><br><span class="line"></span><br><span class="line">	fmt.Println(<span class="string">"*************************"</span>)</span><br><span class="line">	mapInt := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">int</span>]<span class="keyword">int</span>)</span><br><span class="line">	mapInt[<span class="number">1</span>] = <span class="number">2</span></span><br><span class="line">	<span class="built_in">println</span>(<span class="string">"in main, mapInt"</span>, mapInt, &amp;mapInt)</span><br><span class="line">	mapTest(mapInt)</span><br><span class="line">	<span class="built_in">println</span>(<span class="string">"in main, mapInt"</span>, mapInt, &amp;mapInt)</span><br><span class="line">	fmt.Println(<span class="string">"in main, mapInt"</span>, mapInt)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">输出结果</span><br><span class="line">in main, t <span class="number">1</span> <span class="number">0xc0000140a0</span></span><br><span class="line">in main, t <span class="number">2</span> <span class="number">0xc0000140a0</span></span><br><span class="line">in getInt, i <span class="number">5</span> <span class="number">0xc00006ad</span>e0</span><br><span class="line">in main, t <span class="number">5</span> <span class="number">0xc0000140a0</span></span><br><span class="line">in intTest, i <span class="number">5</span> <span class="number">0xc00006ad</span>e8</span><br><span class="line">in main, t <span class="number">5</span> <span class="number">0xc0000140a0</span></span><br><span class="line">*************************</span><br><span class="line">in main, l <span class="number">0xc00006ae58</span> [<span class="number">3</span>/<span class="number">3</span>]<span class="number">0xc000012140</span></span><br><span class="line">in main, l <span class="number">0xc00006ae58</span> [<span class="number">5</span>/<span class="number">5</span>]<span class="number">0xc00001a060</span></span><br><span class="line">in main, l2 <span class="number">0xc00006ae40</span> [<span class="number">5</span>/<span class="number">5</span>]<span class="number">0xc00001a060</span></span><br><span class="line">in listTest, list <span class="number">0xc00006ae28</span> [<span class="number">5</span>/<span class="number">5</span>]<span class="number">0xc00001a060</span></span><br><span class="line">in main, l [<span class="number">99</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span>]</span><br><span class="line">*************************</span><br><span class="line">in main, mapInt <span class="number">0xc00006adf</span>0 <span class="number">0xc000062180</span></span><br><span class="line">in mapTest, mapInt <span class="number">0xc00006adf</span>8 <span class="number">0xc000062180</span></span><br><span class="line">in main, mapInt <span class="number">0xc00006adf</span>0 <span class="number">0xc000062180</span></span><br><span class="line">in main, mapInt <span class="keyword">map</span>[<span class="number">1</span>:<span class="number">2</span> <span class="number">99</span>:<span class="number">100</span>]</span><br></pre></td></tr></table></figure>
+<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>先看第一组结果，简单int变量t，重新赋值为2后，在内存中的地址不变。与Python不同，Python简单对象赋值是引用重定向，引用一个新的对象，会改变id(obj)的结果。Goland是在原对象的基础上修改，改变原对象中的内容。函数的传参、返回值都会拷贝一个新对象，修改拷贝的对象不影响原对象。</p>
+<p>再看第二组结果，切片类型l，打印第一个数值是变量地址，后面接的是[len/cap]数组内存地址，切片独享保留着对数组内存地址的引用。第二次对切片赋值，同样的对象地址不变，其len、cap、数组地址发生变化。在函数listTest中，形参同样会生成一个新的对象，切片拷贝对象的len、cap、数组内存地址与元对象一致，如果改变拷贝切片中的元素，由于其引用同一个连续数组内存，原对象上也会得到体现，最后main中l[0]=99<br></p>
+<p>再看第三组结果，map类型，打印的第一个值是map变量的地址，第二个参数是map对象引用的数据块地址。同样的，map对象作为形参，会拷贝出一个新对象，与list类似，新老对象引用的数据块地址一致，修改拷贝对象数据块中的数据，会影响老对象的数据。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
+<li>Goland对存在的对象重新赋值，会改变原对象内存中的数据，与Python引用重定向相区别</li>
+<li>Goland中slices、map、channel为引用类型，其余简单类型为值类型，值类型对象中空间中包含了对象所需的全部内容，引用类型除了基本信息外还引用着一块可以共享的数据块</li>
+<li>Goland对象作为函数参数、函数返回值、对象间赋值、copy等机制会从老对象拷贝出一个新的对象。这里是浅拷贝机制，值类型完全复制，共用引用数据块，复制引用地址。</li>
+<li><strong>修改拷贝对象时，拷贝对象是引用类型，且修改的是引用数据块中的数据，会影响所有引用该数据块引用对象</strong>，这里容易出bug。</li>
+<li>深拷贝可考虑序列化、反序列化来实现，深拷贝都比较耗时，非必须不建议使用</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/10/通用技术总结/" rel="next" title="通用技术总结">
+                <i class="fa fa-chevron-left"></i> 通用技术总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/logo.png"
+                alt="Liang" />
+            
+              <p class="site-author-name" itemprop="name">Liang</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://liangiter.github.io/" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hl_hnu@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Goland的值与引用类型"><span class="nav-number">1.</span> <span class="nav-text">Goland的值与引用类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分析"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Liang</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'jKTabnedBRRxBo2rLXwFLBRs-gzGzoHsz',
+        appKey: '57GqmXJhb2wlnuVsLDzJteuX',
+        placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LiangIter" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="近期公司技术分享讲座十分火热，近期我做了有关垃圾回收机制的分享，整理一下文档  垃圾回收背景 John McCarthy 身为 Lisp 之父和人工智能之父，同时，他也是 GC 之父。1960 年，他在其论文中首次发布了 GC 算法（其实是委婉的提出😂）。而 Java 的前身 Oak 是在 1990 发布的，利用 JVM 实现了跨平台。GC 因此一举成名。  垃圾回收基本概念基本概念:  全集">
+<meta property="og:type" content="article">
+<meta property="og:title" content="垃圾回收机制">
+<meta property="og:url" content="http://liangiter.top/2018/11/10/垃圾回收机制/index.html">
+<meta property="og:site_name" content="LiangIter">
+<meta property="og:description" content="近期公司技术分享讲座十分火热，近期我做了有关垃圾回收机制的分享，整理一下文档  垃圾回收背景 John McCarthy 身为 Lisp 之父和人工智能之父，同时，他也是 GC 之父。1960 年，他在其论文中首次发布了 GC 算法（其实是委婉的提出😂）。而 Java 的前身 Oak 是在 1990 发布的，利用 JVM 实现了跨平台。GC 因此一举成名。  垃圾回收基本概念基本概念:  全集">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://liangiter.top/2018/11/10/垃圾回收机制/reachable.png">
+<meta property="og:image" content="http://liangiter.top/2018/11/10/垃圾回收机制/ref_count.png">
+<meta property="og:image" content="http://liangiter.top/2018/11/10/垃圾回收机制/ref_count2.png">
+<meta property="og:image" content="http://liangiter.top/2018/11/10/垃圾回收机制/copy.png">
+<meta property="og:image" content="http://liangiter.top/2018/11/10/垃圾回收机制/relocate.png">
+<meta property="og:image" content="http://liangiter.top/2018/11/10/垃圾回收机制/obj_graph.png">
+<meta property="og:updated_time" content="2018-09-25T09:56:23.021Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="垃圾回收机制">
+<meta name="twitter:description" content="近期公司技术分享讲座十分火热，近期我做了有关垃圾回收机制的分享，整理一下文档  垃圾回收背景 John McCarthy 身为 Lisp 之父和人工智能之父，同时，他也是 GC 之父。1960 年，他在其论文中首次发布了 GC 算法（其实是委婉的提出😂）。而 Java 的前身 Oak 是在 1990 发布的，利用 JVM 实现了跨平台。GC 因此一举成名。  垃圾回收基本概念基本概念:  全集">
+<meta name="twitter:image" content="http://liangiter.top/2018/11/10/垃圾回收机制/reachable.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://liangiter.top/2018/11/10/垃圾回收机制/"/>
+
+
+
+
+
+  <title>垃圾回收机制 | LiangIter</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LiangIter</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://liangiter.top/2018/11/10/垃圾回收机制/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Liang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/logo.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LiangIter">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">垃圾回收机制</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-10T15:55:50+08:00">
+                2018-11-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/11/10/垃圾回收机制/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/10/垃圾回收机制/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3.3k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  12 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>近期公司技术分享讲座十分火热，近期我做了有关垃圾回收机制的分享，整理一下文档</p>
+</blockquote>
+<h3 id="垃圾回收背景"><a href="#垃圾回收背景" class="headerlink" title="垃圾回收背景"></a>垃圾回收背景</h3><blockquote>
+<p>John McCarthy 身为 Lisp 之父和人工智能之父，同时，他也是 GC 之父。1960 年，他在其论文中首次发布了 GC 算法（其实是委婉的提出😂）。而 Java 的前身 Oak 是在 1990 发布的，利用 JVM 实现了跨平台。GC 因此一举成名。</p>
+</blockquote>
+<h3 id="垃圾回收基本概念"><a href="#垃圾回收基本概念" class="headerlink" title="垃圾回收基本概念"></a>垃圾回收基本概念</h3><p>基本概念:</p>
+<ul>
+<li>全集</li>
+<li>根集</li>
+<li>可达到的对象集合</li>
+<li>不可达到的对象集合</li>
+</ul>
+<h4 id="垃圾的定义"><a href="#垃圾的定义" class="headerlink" title="垃圾的定义"></a>垃圾的定义</h4><p>引用《垃圾回收的算法与实现》书中的话:</p>
+<blockquote>
+<p>把分配到堆中那些不能通过程序引用的对象称为非活动对象，也就是死掉的对象，我们称为“垃圾”。</p>
+</blockquote>
+<ul>
+<li>程序无法访问的对象</li>
+<li>GC 收集器需要能正确找到垃圾对象并销毁之</li>
+</ul>
+<h4 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h4><p>因为我们期望让内存管理变得自动（只管用内存，不管内存的回收），我们就必须做两件事情：</p>
+<blockquote>
+<p>找到内存空间里的垃圾回收垃圾，让程序员能再次利用这部分空间 [1] 只要满足这两项功能的程序，就是 GC，不论它是在 JVM 中，还是在 Ruby 的 VM 中。但这只是两个需求，并没有说明 GC 应该何时找垃圾，何时回收垃圾等等更具体的问题，各类 GC 算法就是在这些更具体问题的处理方式上施展手脚。</p>
+</blockquote>
+<h4 id="全集"><a href="#全集" class="headerlink" title="全集"></a>全集</h4><ul>
+<li>进程内存中全部对象的集合</li>
+<li>以 Python 为例:</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gc.get_objects()</span><br></pre></td></tr></table></figure>
+<h4 id="根集"><a href="#根集" class="headerlink" title="根集"></a>根集</h4><ul>
+<li>不用通过引用关系,可以直接访问对象的集合</li>
+</ul>
+<h4 id="可达对象集合"><a href="#可达对象集合" class="headerlink" title="可达对象集合"></a>可达对象集合</h4><ul>
+<li>根集的对象</li>
+<li>通过可达对象,利用引用关系遍历到的所有对象<br><img src="/2018/11/10/垃圾回收机制/reachable.png" alt="imag"></li>
+</ul>
+<h4 id="不可达到的对象集合"><a href="#不可达到的对象集合" class="headerlink" title="不可达到的对象集合"></a>不可达到的对象集合</h4><ul>
+<li>全集与可达对象集合差集</li>
+<li>不可达对象是垃圾</li>
+<li>Python 中 gc.collect()后垃圾存在列表 gc.grabage 中</li>
+</ul>
+<h4 id="垃圾回收的优点"><a href="#垃圾回收的优点" class="headerlink" title="垃圾回收的优点"></a>垃圾回收的优点</h4><ul>
+<li>提高编程效率</li>
+<li>避免内存泄漏</li>
+<li>野指针 (悬垂指针)</li>
+<li>释放错误的内存</li>
+</ul>
+<blockquote>
+<p>内存泄露：忘记释放了某一部分内存，会导致那部分内存不可用，并占用总的内存空间。如果这一现象持续发生，会引起内存被占满，系统崩溃悬垂指针：忘记初始化指向释放了的内存的指针。这会导致再次调用指针时，该指针指向空内存，引起 bug 释放错误的内存：人为的操作难免会发生错误，如果释放了错误的内存，也会导致程序发生莫名其妙的 bug</p>
+</blockquote>
+<blockquote>
+<p>由此可见垃圾回收的重要性，既可以减少程序员的工作量，更重要的是可以避免很多不必要的错误。</p>
+</blockquote>
+<h4 id="垃圾回收缺点"><a href="#垃圾回收缺点" class="headerlink" title="垃圾回收缺点"></a>垃圾回收缺点</h4><ul>
+<li>垃圾回收消耗cpu，影响程序性能</li>
+</ul>
+<h4 id="垃圾回收性能评价"><a href="#垃圾回收性能评价" class="headerlink" title="垃圾回收性能评价"></a>垃圾回收性能评价</h4><ul>
+<li>垃圾回收总时间</li>
+<li>进程突然的停顿</li>
+<li>空间利用 —— 减少内存碎片 - 空间连续性、时间连续性</li>
+<li>以上要求互相制衡，需要折中</li>
+</ul>
+<h3 id="主流垃圾回收策略"><a href="#主流垃圾回收策略" class="headerlink" title="主流垃圾回收策略"></a>主流垃圾回收策略</h3><p>John McCarthy 身为 Lisp 之父和人工智能之父，同时，他也是 GC 之父。1960 年，他在其论文中首次发布了 GC 算法（其实是委婉的提出😂）。</p>
+<p>标记-清除算法 由 John McCarthy 在 1960 年提出 引用计数法 由 George E. Collins 在 1960 年提出 此算法会有循环引用问题，Harold McBeth 1963 年指出。 复制算法 由 Marvin L. Minsky 在 1963 年提出</p>
+<p>《垃圾回收》的作者认为：</p>
+<blockquote>
+<p>从 50 年前 GC 算法首次发布以来，众多研究者对其进行了各种各样的研究，因此许多 GC 算法也得以发布。[2] 但事实上，这些算法只不过是把前文中提到的三种算法进行组合或应用。也可以这么说，1963 年 GC 复制算法诞生时，GC 的根本性内容就已经完成了。</p>
+</blockquote>
+<h4 id="引用计数法"><a href="#引用计数法" class="headerlink" title="引用计数法"></a>引用计数法</h4><p>垃圾回收关注的是对于不会再次被使用的对象的内存回收，换一种说法，对于会被垃圾回收清理的对象（内存），不会再次的被其他对象引用。那么可以为每一个对象引入一个计数器，对于任意一个对象，每有一次对这个对象的引用，就将计数器加 1；结束对这个对象的引用，再将计数器减 1；一旦计数器归 0，则表示这个对象可以被清除。这就是引用计数法。</p>
+<p>由于在计数器归 0 后，可以立即知道这个对象成为了垃圾，所以引用计数法有着即使回收的优点。同样，这个算法也不是完美的，存在着一定的缺点：</p>
+<ul>
+<li>占用资源：因为每个对象都需要维护一个计数器，每次指针有更新都伴随着计数器的更新，一定程度上占用了计算资源</li>
+<li>占用内存：计数器需要占用一定的内存，为了安全起见，计数器值的上限要大于所有对象的上限，这也是一笔不小的开销</li>
+<li>实现复杂：虽然引用计数的思想简单，但是实现起来却不那么容易。各位可以思考下，如果自己编写这一算法，该如何实现？</li>
+<li>无法解决循环引用：就像会有狗狗喜欢咬自己的尾巴，把自己咬成环，对象也会存在循环的引用。假设两个对象 a 和 b，a 有指向 b 的指针，b 有指向 a 的指针。二者可能一起成为垃圾，一旦这种情况发生，由于存在对对方的引用，它们的计数器永远都不会归 0，它们也不会被回收</li>
+</ul>
+<h4 id="标记清除"><a href="#标记清除" class="headerlink" title="标记清除"></a>标记清除</h4><p>正如算法的名字，标记清除法可以划分成两个阶段，标记和清除：</p>
+<ul>
+<li>标记</li>
+<li><ul>
+<li>标记根集中的所有对象为可达</li>
+</ul>
+</li>
+<li><ul>
+<li>从根集中的对象遍历，将其引用的对象标记为可达</li>
+</ul>
+</li>
+<li><ul>
+<li>迭代第二步，找到所有可达对象</li>
+</ul>
+</li>
+<li><p>清除</p>
+</li>
+<li><ul>
+<li>全集与可达对象集合的差集，标记为不可达对象集合</li>
+</ul>
+</li>
+<li><ul>
+<li>销毁所有不可达对象</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2018/11/10/垃圾回收机制/ref_count.png" alt="imag"></p>
+<p>优点</p>
+<ul>
+<li>思路简单，实现简单，是这个算法的一大优点.</li>
+<li>没有额外内存开销</li>
+<li>可以正确销毁循环引用的对象</li>
+</ul>
+<p>缺点</p>
+<p>简单也意味着在其他部分有所牺牲，从上图我们可以看出一些端倪：碎片化：由于只是将垃圾对象清除掉，对于存活对象不做处理，所以由于存活对象分布的不连续性，会导致可用内存被分割成一块块的。如果有一个新的对象请求内存，需要去内存中寻找，哪一个空闲块（可用一个链表来维护空闲块的位置）足够满足这个对象的需求。更极端的情况，空闲的总内存大于对象请求的空间，却没有足够的连续空闲空间，来完成内存的分配。与写时复制技术不兼容：写时复制（Copy On Write）是一个很重要的思想，可以优化内存占用或者提升并发环境下的性能。顾名思义，这一技术是在有写入的时候，对内存进行复制，以达到一定的优化目的。而标记清除算法的标记过程，就是一次对内存（对象头）的写入，会不断地引起内存复制。因此标记清除算法与此技术并不互相兼容</p>
+<ul>
+<li>标记-清除操作时间消耗较大，程序会顿卡</li>
+<li>对象不可达后，销毁有延时</li>
+</ul>
+<p><img src="/2018/11/10/垃圾回收机制/ref_count2.png" alt="imag"></p>
+<h4 id="复制算法"><a href="#复制算法" class="headerlink" title="复制算法"></a>复制算法</h4><p>在复制算法中，先将内存分为两个部分，From 区和 To 区，两部分大小相等。对象分配时，只会在 From 区进行分配。复制算法可以分两步，第一步为类似标记清除算法的标记，在 From 区中，找出所有活动的对象。区别在于第二步。复制算法会把这些活动的对象，复制到 To 区中，再将原有的 From 区全部清空，并交换两部分内存的职责，即一次 GC 后，原有的 From 区会成为 To 区，To 区相反。</p>
+<p><img src="/2018/11/10/垃圾回收机制/copy.png" alt="imag"></p>
+<p>优点<br>复制算法的优点相比于另外两个算法还是多一些的：</p>
+<p>效率快：相比于标记清除算法，复制算法在标记阶段，只需要标记哪些对象是活动的就可以了，相比于标记清除算法需要遍历所有的对象，性能上有提升不会发生碎片化：同样相比于标记清除算法，由于存活下来的对象会在 To 区中连续的分配，因此不会像标记清除算法那样，需要维护碎片空间分配速度快：由于不会发生碎片化，如果有一个新的对象请求内存，那么分配时可以直接追加在 From 区已用内存之后，分配的速度快.</p>
+<p>缺点<br>同样复制算法也不是十全十美，它也有着如下的缺点：内存使用率低：由于复制算法把内存分成了两块，那么对于对象的可用空间来说，仅仅是其他算法的一半自对象的递归复制：一个对象通常会关联一些自对象。在复制这些对象的时候，还需要递归的去处理它的自对象，这通常会产生一定的开销。同时，在递归调用时，存在着函数栈的消耗，潜藏着栈溢出的风险</p>
+<h4 id="重定位"><a href="#重定位" class="headerlink" title="重定位"></a>重定位</h4><ul>
+<li>不可到达对象在内存中是分散的，回收对象后，空闲内存是分段的</li>
+<li>移动可到达的堆对象，保持内存连续<br><img src="/2018/11/10/垃圾回收机制/relocate.png" alt="imag"></li>
+</ul>
+<h4 id="分代算法"><a href="#分代算法" class="headerlink" title="分代算法"></a>分代算法</h4><ul>
+<li>销毁的总是年轻的对象<br>— 统计表明：80%-90%新分配的对象会在随后几百万条指令周期内销毁</li>
+<li>将堆空间分成几块</li>
+<li>新对象生成在空间1</li>
+<li>当空间1满了，将对象移动到空间2，再往上也如此类推</li>
+<li>空间序号越小，垃圾回收检测越频繁</li>
+<li>Python分为三代，gc.get_threshold可以获取每一代空间的默认阈值</li>
+</ul>
+<h3 id="各语言的垃圾回收策略"><a href="#各语言的垃圾回收策略" class="headerlink" title="各语言的垃圾回收策略"></a>各语言的垃圾回收策略</h3><table>
+<thead>
+<tr>
+<th>Luanguage</th>
+<th>引用计数</th>
+<th>标记-清除</th>
+<th>分代</th>
+<th>重定位</th>
+<th>复制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>√</td>
+<td>√</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Java</td>
+<td>√</td>
+<td>√</td>
+<td></td>
+<td></td>
+<td>√</td>
+</tr>
+<tr>
+<td>Golang</td>
+<td>√</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>1、JavaScript 中 BOM、COM 用的是引用计数机制<br><br>2、Golang 最新用的是三色标记-清除算法，标记阶段需要 STW，清除阶段可以并发进行</p>
+</blockquote>
+<h3 id="Python垃圾回收实战"><a href="#Python垃圾回收实战" class="headerlink" title="Python垃圾回收实战"></a>Python垃圾回收实战</h3><p>以 Python 为例 Python 的 gc.collect() 标记-清除需要消耗一定时间，在对象数量达到百万级别时会有秒级卡顿。有些项目对实时性要求比较高，会调用 gc.disable()关闭 gc；关闭 gc 意味着在开发阶段就要解除所有的循环引用，不然会造成内存泄漏。即使不关闭 gc，在销毁对象时解除循环引用，有利于减少 gc 卡顿时间。那如何找到循环引用的对象？如何找出引用环的情况？</p>
+<blockquote>
+<p>gc.DEBUG_SAVEALL When set, all unreachable objects found will be appended to garbage rather than being freed. This can be useful for debugging a leaking program.</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gc.set_debug(gc.DEBUG_SAVEALL)</span><br><span class="line">gc.collect()</span><br><span class="line">print(gc.garbage)</span><br></pre></td></tr></table></figure>
+<p>上面的方法可以找到垃圾对象，但要靠自己去找到对象间的引用情况来解除引用。利用 objgraph 可以找到对象的引用关系链并生成图。但是在实践中，进程中对象数量较大时，objgraph 经常会慢到让人想要原地自爆。也可以自己编写工具，在 gc.garbage 做图的遍历，找到所有的环引用，这样会比较全比较快。(TODO: 待分享通过gc.garbage查环工具代码)<br><img src="/2018/11/10/垃圾回收机制/obj_graph.png" alt="imag"></p>
+<blockquote>
+<p>gc.garbage <br><br>A list of objects which the collector found to be unreachable but could not be freed (uncollectable objects). By default, this list contains only objects with <strong>del</strong>() methods. [1] Objects that have <strong>del</strong>() methods and are part of a reference cycle cause the entire reference cycle to be uncollectable, including objects not necessarily in the cycle but reachable only from it. Python doesn’t collect such cycles automatically because, in general, it isn’t possible for Python to guess a safe order in which to run the <strong>del</strong>() methods. If you know a safe order, you can force the issue by examining the garbage list, and explicitly breaking cycles due to your objects within the list. Note that these objects are kept alive even so by virtue of being in the garbage list, so they should be removed from garbage too. For example, after breaking cycles, do del gc.garbage[:] to empty the list. It’s generally better to avoid the issue by not creating cycles containing objects with <strong>del</strong>() methods, and garbage can be examined in that case to verify that no such cycles are being created.</p>
+</blockquote>
+<blockquote>
+<p>If DEBUG_SAVEALL is set, then all unreachable objects will be added to this list rather than freed.</p>
+</blockquote>
+<p>有个很重要的点，Python2 中，当对象形成环引用，即使开启 gc，实现了<strong>del</strong>方法的对象也无法被回收，因为 gc 并不知道在<strong>del</strong>方法中是否对引用的对象有操作，无法确定正确的回收顺序。在Python 中，一般而言，尽量不要实现<strong>del</strong>方法，而改用其他方法在销毁时手动调用之。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/10/十步学习法/" rel="next" title="十步学习法">
+                <i class="fa fa-chevron-left"></i> 十步学习法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/11/10/通用技术总结/" rel="prev" title="通用技术总结">
+                通用技术总结 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/logo.png"
+                alt="Liang" />
+            
+              <p class="site-author-name" itemprop="name">Liang</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://liangiter.github.io/" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hl_hnu@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#垃圾回收背景"><span class="nav-number">1.</span> <span class="nav-text">垃圾回收背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#垃圾回收基本概念"><span class="nav-number">2.</span> <span class="nav-text">垃圾回收基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#垃圾的定义"><span class="nav-number">2.1.</span> <span class="nav-text">垃圾的定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#垃圾回收"><span class="nav-number">2.2.</span> <span class="nav-text">垃圾回收</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#全集"><span class="nav-number">2.3.</span> <span class="nav-text">全集</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#根集"><span class="nav-number">2.4.</span> <span class="nav-text">根集</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可达对象集合"><span class="nav-number">2.5.</span> <span class="nav-text">可达对象集合</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#不可达到的对象集合"><span class="nav-number">2.6.</span> <span class="nav-text">不可达到的对象集合</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#垃圾回收的优点"><span class="nav-number">2.7.</span> <span class="nav-text">垃圾回收的优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#垃圾回收缺点"><span class="nav-number">2.8.</span> <span class="nav-text">垃圾回收缺点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#垃圾回收性能评价"><span class="nav-number">2.9.</span> <span class="nav-text">垃圾回收性能评价</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主流垃圾回收策略"><span class="nav-number">3.</span> <span class="nav-text">主流垃圾回收策略</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#引用计数法"><span class="nav-number">3.1.</span> <span class="nav-text">引用计数法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#标记清除"><span class="nav-number">3.2.</span> <span class="nav-text">标记清除</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#复制算法"><span class="nav-number">3.3.</span> <span class="nav-text">复制算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#重定位"><span class="nav-number">3.4.</span> <span class="nav-text">重定位</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分代算法"><span class="nav-number">3.5.</span> <span class="nav-text">分代算法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#各语言的垃圾回收策略"><span class="nav-number">4.</span> <span class="nav-text">各语言的垃圾回收策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Python垃圾回收实战"><span class="nav-number">5.</span> <span class="nav-text">Python垃圾回收实战</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Liang</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'jKTabnedBRRxBo2rLXwFLBRs-gzGzoHsz',
+        appKey: '57GqmXJhb2wlnuVsLDzJteuX',
+        placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
