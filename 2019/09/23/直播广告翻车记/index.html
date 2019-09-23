@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LiangIter" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="关键词：redis slave spire 获取过期数据  周六晚会直播，有人反馈观看过广告后，再也不能触发广告了。第一次值班守护直播，就像守护女朋友一样，小心翼翼胆战心惊如履薄冰，怎奈还是翻船了。话不多说，这锅我背了，快去找到原因解决问题吧。经过一番努力并没有头绪，经过项目组踩过坑的同事查证，redis cluster readonly=1， 导致了读取slave 过期expire数据的bug；">
+<meta property="og:type" content="article">
+<meta property="og:title" content="直播广告翻车记">
+<meta property="og:url" content="http://liangiter.top/2019/09/23/直播广告翻车记/index.html">
+<meta property="og:site_name" content="LiangIter">
+<meta property="og:description" content="关键词：redis slave spire 获取过期数据  周六晚会直播，有人反馈观看过广告后，再也不能触发广告了。第一次值班守护直播，就像守护女朋友一样，小心翼翼胆战心惊如履薄冰，怎奈还是翻船了。话不多说，这锅我背了，快去找到原因解决问题吧。经过一番努力并没有头绪，经过项目组踩过坑的同事查证，redis cluster readonly=1， 导致了读取slave 过期expire数据的bug；">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-09-23T13:57:57.944Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="直播广告翻车记">
+<meta name="twitter:description" content="关键词：redis slave spire 获取过期数据  周六晚会直播，有人反馈观看过广告后，再也不能触发广告了。第一次值班守护直播，就像守护女朋友一样，小心翼翼胆战心惊如履薄冰，怎奈还是翻船了。话不多说，这锅我背了，快去找到原因解决问题吧。经过一番努力并没有头绪，经过项目组踩过坑的同事查证，redis cluster readonly=1， 导致了读取slave 过期expire数据的bug；">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://liangiter.top/2019/09/23/直播广告翻车记/"/>
+
+
+
+
+
+  <title>直播广告翻车记 | LiangIter</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LiangIter</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://liangiter.top/2019/09/23/直播广告翻车记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="LiangIter">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/about/liang.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LiangIter">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">直播广告翻车记</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-23T21:56:11+08:00">
+                2019-09-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/09/23/直播广告翻车记/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/09/23/直播广告翻车记/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.4k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  5 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>关键词：redis slave spire 获取过期数据</p>
+<blockquote>
+<p>周六晚会直播，有人反馈观看过广告后，再也不能触发广告了。第一次值班守护直播，就像守护女朋友一样，小心翼翼胆战心惊如履薄冰，怎奈还是翻船了。<br>话不多说，这锅我背了，快去找到原因解决问题吧。经过一番努力并没有头绪，经过项目组踩过坑的同事查证，redis cluster readonly=1， 导致了读取slave 过期expire数据的bug；<br>广告播放后，同一个用户接下来10分钟内不会再出广告。广告播放的标记存储在redis中，expire设置为600，按理10分钟后标记清除，广告系统获取不到播放标记会给用户再次下发广告。当晚有一些用户看过第一广告后，长时间无法第二次播放广告。经过查询相应用户后台日志，发现问题确实是10分钟不重复观看策略导致的。</p>
+</blockquote>
+<p>也就是说redis存在expire过期数据仍可被读取的情况。<br><br>经过一番查证，redis曾发起Issue <a href="https://github.com/antirez/redis/issues/1768" target="_blank" rel="noopener">Improve expire consistency on slaves</a>，以下摘录说明了这个情况（坑呀，宝宝心里苦%&gt;_&lt;%）</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">In order <span class="keyword">for</span> Redis to ensure consistency between a master <span class="keyword">and</span> its slaves, eviction of keys </span><br><span class="line">with an expire are managed by the master, which sends an <span class="keyword">explicit</span> DEL to its slaves when </span><br><span class="line">the key gets actually removed.</span><br><span class="line">This means that slaves are <span class="keyword">not</span> able to directly expire keys, even <span class="keyword">if</span> these keys are </span><br><span class="line">logically expired on the master side. So a GET that will <span class="keyword">return</span> null in the master side, </span><br><span class="line">may <span class="keyword">return</span> a stale value in the slave side.</span><br><span class="line">为了保证redis主、从一致性，expire数据的删除由master来进行，当expire数据删除的时候，</span><br><span class="line">master会向slave发送删除命令这意味着，即使这些expire数据从逻辑上应该被master端删除，</span><br><span class="line">slaves也不会直接删除expire数据。在master获取这些过期数据将会获取null，</span><br><span class="line">而在slave端可能仍能获取到旧的数据</span><br></pre></td></tr></table></figure>
+<p>凭什么认定我们是读取的从库呢？<br>翻出武功秘籍，对项目用到的golang redis.v5源码进行分析</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *ClusterClient)</span> <span class="title">cmdSlotAndNode</span><span class="params">(state *clusterState, cmd Cmder)</span> <span class="params">(<span class="keyword">int</span>, *clusterNode, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> state == <span class="literal">nil</span> &#123;</span><br><span class="line">		node, err := c.nodes.Random()</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>, node, err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	cmdInfo := c.cmds[cmd.name()]</span><br><span class="line">	firstKey := cmd.arg(cmdFirstKeyPos(cmd, cmdInfo))</span><br><span class="line">	slot := hashtag.Slot(firstKey)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> cmdInfo != <span class="literal">nil</span> &amp;&amp; cmdInfo.ReadOnly &amp;&amp; c.opt.ReadOnly &#123;</span><br><span class="line">		<span class="keyword">if</span> c.opt.RouteByLatency &#123;</span><br><span class="line">			node, err := state.slotClosestNode(slot)</span><br><span class="line">			<span class="keyword">return</span> slot, node, err</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		node, err := state.slotSlaveNode(slot)</span><br><span class="line">		<span class="keyword">return</span> slot, node, err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	node, err := state.slotMasterNode(slot)</span><br><span class="line">	<span class="keyword">return</span> slot, node, err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>redis cluster的readonly字段配置为1的情况下，c.opt.ReadOnly条件成立，会使用slaveNode，反过来则使用masterNode，而使用slaveNode则可能引发上面的问题。</p>
+<h4 id="为什么我们测试的时候没有发现这个问题"><a href="#为什么我们测试的时候没有发现这个问题" class="headerlink" title="为什么我们测试的时候没有发现这个问题"></a>为什么我们测试的时候没有发现这个问题</h4><p>话说我们也有测试过，几个人没有出现这个问题，脸黑吗(⊙o⊙)<br>找啊找，低版本Redis expire过期的策略<a href="https://redis.io/commands/expire#how-redis-expires-keys" target="_blank" rel="noopener">在这里</a>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">How Redis expires keys</span><br><span class="line">Redis keys are expired in two ways: a passive way, <span class="keyword">and</span> an active way.</span><br><span class="line">A key is passively expired simply when some client tries to access it, </span><br><span class="line"><span class="keyword">and</span> the key is found to be timed out.</span><br><span class="line">Of course <span class="keyword">this</span> is <span class="keyword">not</span> enough as there are expired keys that will never </span><br><span class="line">be accessed again. These keys should be expired anyway, so periodically </span><br><span class="line">Redis tests a few keys at random among keys with an expire <span class="built_in">set</span>. All the </span><br><span class="line">keys that are already expired are deleted from the keyspace.</span><br><span class="line"></span><br><span class="line">Specifically <span class="keyword">this</span> is what Redis does <span class="number">10</span> times per second:</span><br><span class="line"><span class="number">1.</span> Test <span class="number">20</span> random keys from the <span class="built_in">set</span> of keys with an associated expire.</span><br><span class="line"><span class="number">2.</span> Delete all the keys found expired.</span><br><span class="line"><span class="number">3.</span> If more than <span class="number">25</span>% of keys were expired, start again from step <span class="number">1.</span></span><br><span class="line">This is a trivial probabilistic algorithm, basically the assumption is </span><br><span class="line">that our sample is representative of the whole key space, </span><br><span class="line"><span class="keyword">and</span> we <span class="keyword">continue</span> to expire until the percentage of keys that are likely </span><br><span class="line">to be expired is under <span class="number">25</span>%</span><br><span class="line"></span><br><span class="line">Redis如何过期密钥</span><br><span class="line">Redis密钥以两种方式过期：被动方式和主动方式。</span><br><span class="line">当某个客户端尝试访问密钥时，密钥被动过期，并且发现密钥超时。</span><br><span class="line">当然这还不够，因为有过期的密钥永远不会被再次访问。这些密钥无论如何都应该过期，</span><br><span class="line">所以周期性地Redis会在具有过期集的密钥中随机测试几个密钥。已经过期的</span><br><span class="line">所有密钥都将从密钥空间中删除。</span><br><span class="line">具体来说，这就是Redis每秒做<span class="number">10</span>次的事情：</span><br><span class="line"><span class="number">1.</span> 从具有相关过期的密钥集中测试<span class="number">20</span>个随机密钥。</span><br><span class="line"><span class="number">2.</span> 删除找到的所有密钥已过期。</span><br><span class="line"><span class="number">3.</span> 如果超过<span class="number">25</span>％的密钥已过期，请从步骤<span class="number">1</span>重新开始。</span><br><span class="line">这是一个简单的概率算法，基本上假设我们的样本代表整个密钥空间，</span><br><span class="line">我们继续到期，直到可能过期的密钥百分比低于<span class="number">25</span>％</span><br></pre></td></tr></table></figure>
+<p>从以上信息可以归纳出：</p>
+<ol>
+<li>测试的时候，QPS小，Redis主动过期策略1s内可以清楚10*20=200个已过期的key，完全能处理测试好测试时候的expire key；</li>
+<li>到了正式上线，QPS增大，整体上会保留25%已过期的expire key，这也可以解释为什么有些人可以重复看到广告，有些人不可以；<br>这种带有随机性质的问题，通常定位起来都会困难一些，脸确实有点黑O__O </li>
+</ol>
+<h4 id="解决方案："><a href="#解决方案：" class="headerlink" title="解决方案："></a>解决方案：</h4><ol>
+<li>查看我司服务器redis版本是redis_version:3.0.7-m，这个问题在Redis 3.2 中得到解决，升级大法保平安（万能解决之道，搞不定了，试试升级吧）。</li>
+<li>结合go redis.v5库特性，将readonly字段配置为0，使用masterNode节点。当然，你可以直接连master，就不会有这个问题。但要注意这种方案将会增大master的压力，酌情考虑。</li>
+<li>除此之外也有同学提出了另外的<a href="https://toutiao.io/posts/1884/app_preview" target="_blank" rel="noopener">解决方案</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/06/26/Goland的值与引用类型/" rel="next" title="Goland的值与引用类型">
+                <i class="fa fa-chevron-left"></i> Goland的值与引用类型
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/about/liang.png"
+                alt="LiangIter" />
+            
+              <p class="site-author-name" itemprop="name">LiangIter</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://liangiter.github.io/" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hl_hnu@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么我们测试的时候没有发现这个问题"><span class="nav-number">1.</span> <span class="nav-text">为什么我们测试的时候没有发现这个问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#解决方案："><span class="nav-number">2.</span> <span class="nav-text">解决方案：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Liang</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'jKTabnedBRRxBo2rLXwFLBRs-gzGzoHsz',
+        appKey: '57GqmXJhb2wlnuVsLDzJteuX',
+        placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
