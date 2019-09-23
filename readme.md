@@ -18,7 +18,7 @@ hexo new "tags"
 
 ## 域名
 github: https://liangiter.github.io/<br>
-coding: LiangIter.coding.me/liangiter.coding.me<br>
-domain: liangiter.top<br>
+coding: http://LiangIter.coding.me/liangiter.coding.me<br>
+domain: http://liangiter.top<br>
 
 
